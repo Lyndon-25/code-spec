@@ -1,0 +1,2 @@
+# 配置 lint-staged 来修复和格式化代码
+npx lint-staged

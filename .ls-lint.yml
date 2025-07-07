@@ -1,0 +1,12 @@
+root: true
+rules:
+  kebab-case: /^[a-z0-9]+(-[a-z0-9]+)*$/
+  use-camel-case: /^use[A-Z][A-Za-z0-9]*\.ts$/
+ignore:
+  - node_modules
+  - dist
+folders:
+  src: kebab-case
+files:
+  src: kebab-case
+  src/**/use*.ts: use-camel-case

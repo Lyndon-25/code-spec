@@ -1,0 +1,2 @@
+# 配置 commitlint 来检查 commit 消息
+npx --no -- commitlint --edit "$1"

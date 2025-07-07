@@ -1,0 +1,69 @@
+{
+  "name": "@lyndon/multirepo",
+  "version": "0.1.0",
+  "description": "这是一个使用 TypeScript 开发的多仓库模板项目，包含了 ESLint、Prettier、Husky 等开发工具的最佳实践配置。",
+  "main": "dist/index.js",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*": [
+      "ls-lint"
+    ],
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "template",
+    "best-practice"
+  ],
+  "author": {
+    "name": "Lyndon",
+    "email": "wuxianzhi051@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/multirepo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/multirepo/issues"
+  },
+  "homepage": "https://github.com/your-username/multirepo#readme",
+  "engines": {
+    "node": ">=20.x",
+    "pnpm": ">=10.x"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "lodash-es": "^4.17.21",
+    "zod": "^3.25.75"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.30.1",
+    "@ls-lint/ls-lint": "^2.3.1",
+    "@types/lodash-es": "^4.17.12",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "@typescript-eslint/parser": "^8.35.1",
+    "eslint": "^9.30.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}
