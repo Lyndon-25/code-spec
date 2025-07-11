@@ -1,15 +1,16 @@
-# @lyndon/multirepo
+# @lyndon/code-spec
 
 [![Node.js](https://img.shields.io/badge/Node.js-20.x+-green.svg)](https://nodejs.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-10.x+-orange.svg)](https://pnpm.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8+-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-一个现代化的 TypeScript 多仓库开发模板，集成了完整的开发工具链和最佳实践配置。旨在为团队提供开箱即用、规范化的项目开发环境。
+一个现代化的 TypeScript 代码规范模板，集成了完整的开发工具链和最佳实践配置。旨在为团队提供开箱即用、规范化的项目开发环境。
 
 ## ✨ 核心特性
 
 ### 🛠️ 开发工具链
+
 - **TypeScript 5.8+** - 类型安全，现代开发体验
 - **ESLint 9.x** - 代码质量检查，Flat Config 配置
 - **Prettier 3.x** - 代码格式化，统一代码风格
@@ -19,6 +20,7 @@
 - **ls-lint** - 文件/文件夹命名规范自动校验
 
 ### 🎯 最佳实践
+
 - **模块化配置** - 各工具配置独立，易于维护
 - **自动化工作流** - 提交前自动检查，保障代码质量
 - **团队协作友好** - 统一的代码规范和提交规范
@@ -27,13 +29,16 @@
 ## 📁 项目结构
 
 ```
-multirepo/
+code-spec/
 ├── src/                    # 源码目录
-│   └── index.ts           # 入口文件
+│   ├── index.ts           # 入口文件
+│   └── utils/             # 工具函数目录
+│       └── index.ts       # 工具函数入口
 ├── .husky/                # Git 钩子配置
 │   ├── pre-commit        # 提交前检查
 │   └── commit-msg        # 提交信息校验
 ├── .vscode/              # VS Code 配置
+│   └── settings.json     # 自动格式化 & 修复等配置
 ├── eslint.config.js      # ESLint 配置（Flat Config）
 ├── prettier.config.js    # Prettier 配置
 ├── .ls-lint.yml         # 文件命名规范配置
@@ -56,8 +61,8 @@ multirepo/
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/your-username/multirepo.git
-cd multirepo
+git clone https://github.com/lyndon/code-spec.git
+cd code-spec
 ```
 
 ### 2. 安装依赖
@@ -66,17 +71,38 @@ cd multirepo
 pnpm install
 ```
 
-### 3. 开发模式
+### 3. 开发命令
 
 ```bash
+# 构建项目
+pnpm build
+
+# 开发模式（监听文件变化）
+pnpm dev
+
+# 清理构建文件
+pnpm clean
+
+# 重新构建
+pnpm rebuild
+
 # 代码检查
-pnpm exec eslint src --fix
+pnpm lint
+
+# 代码检查（仅检查，不修复）
+pnpm lint:check
 
 # 代码格式化
-pnpm exec prettier --write src
+pnpm format
+
+# 代码格式化检查
+pnpm format:check
 
 # 类型检查
-pnpm exec tsc --noEmit
+pnpm type-check
+
+# 文件命名规范检查
+pnpm ls-lint
 ```
 
 ## 🛠️ 开发规范
@@ -113,13 +139,8 @@ pnpm exec tsc --noEmit
 ```json
 {
   "*": ["ls-lint"],
-  "*.{js,jsx,ts,tsx}": [
-    "eslint --fix",
-    "prettier --write"
-  ],
-  "*.{json,md,yml}": [
-    "prettier --write"
-  ]
+  "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
+  "*.{json,md,yml,yaml}": ["prettier --write"]
 }
 ```
 
@@ -128,6 +149,7 @@ pnpm exec tsc --noEmit
 格式：`<type>(<scope>): <subject>`
 
 **类型 (type)**:
+
 - `feat`: 新功能
 - `fix`: 修复 bug
 - `docs`: 文档更新
@@ -141,6 +163,7 @@ pnpm exec tsc --noEmit
 - `ci`: 持续集成
 
 **示例**:
+
 ```bash
 feat(user): 添加用户登录功能
 fix(auth): 修复登录验证逻辑
@@ -151,11 +174,13 @@ style(eslint): 调整代码格式化规则
 ## 📦 主要依赖
 
 ### 生产依赖
+
 - [dayjs](https://day.js.org/) - 轻量级日期处理库
 - [lodash-es](https://lodash.com/) - 实用工具函数库
 - [zod](https://zod.dev/) - TypeScript 优先的模式验证
 
 ### 开发依赖
+
 - [TypeScript](https://www.typescriptlang.org/) - JavaScript 的超集
 - [ESLint](https://eslint.org/) - 代码质量检查工具
 - [Prettier](https://prettier.io/) - 代码格式化工具
@@ -167,22 +192,25 @@ style(eslint): 调整代码格式化规则
 ## 🔧 配置说明
 
 ### ESLint 配置
+
 - 使用 Flat Config 格式
 - 集成 TypeScript 支持
 - 与 Prettier 完美配合
 - 自动导入排序
 
 ### Prettier 配置
+
 - 单行最大长度: 120 字符
 - 缩进: 2 个空格
 - 使用双引号
 - 尾随逗号: 全部
 
 ### TypeScript 配置
+
 - 严格模式启用
-- ES2022 目标
-- 模块解析: Node.js
-- 声明文件生成
+- ESNext 目标
+- 模块解析: bundler
+- 输出目录: `./dist`
 
 ## 🤝 贡献指南
 
@@ -197,6 +225,7 @@ style(eslint): 调整代码格式化规则
 ### 代码检查
 
 提交前会自动执行以下检查：
+
 - ✅ ESLint 代码质量检查
 - ✅ Prettier 代码格式化
 - ✅ ls-lint 文件命名规范
@@ -206,16 +235,16 @@ style(eslint): 调整代码格式化规则
 
 ```bash
 # 代码质量检查
-pnpm exec eslint src --fix
+pnpm lint
 
 # 代码格式化
-pnpm exec prettier --write src
+pnpm format
 
 # 类型检查
-pnpm exec tsc --noEmit
+pnpm type-check
 
 # 文件命名检查
-pnpm exec ls-lint
+pnpm ls-lint
 ```
 
 ## 📄 开源协议
@@ -226,8 +255,8 @@ pnpm exec ls-lint
 
 - **作者**: Lyndon
 - **邮箱**: wuxianzhi052@gmail.com
-- **GitHub**: [@your-username](https://github.com/your-username)
-- **Issues**: [GitHub Issues](https://github.com/your-username/multirepo/issues)
+- **GitHub**: [@lyndon](https://github.com/lyndon)
+- **Issues**: [GitHub Issues](https://github.com/lyndon/code-spec/issues)
 
 ## 🙏 致谢
 
