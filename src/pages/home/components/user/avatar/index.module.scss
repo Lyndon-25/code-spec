@@ -1,0 +1,37 @@
+// 用户头像组件样式
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e1e5e9;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #007bff;
+    transform: scale(1.05);
+  }
+
+  &.small {
+    width: 32px;
+    height: 32px;
+  }
+
+  &.medium {
+    width: 48px;
+    height: 48px;
+  }
+
+  &.large {
+    width: 64px;
+    height: 64px;
+  }
+
+  &.placeholder {
+    background-color: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-weight: 500;
+  }
+}

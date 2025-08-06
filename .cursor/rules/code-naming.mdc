@@ -1,0 +1,556 @@
+---
+alwaysApply: true
+appliesTo:
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.ts"
+  - "**/*.tsx"
+---
+
+# 代码标识符命名规范
+
+## 规范说明
+
+本规范定义了 TypeScript/JavaScript 代码中**标识符命名**的统一标准，包括：
+
+- **通用命名规则**：标识符类型的快速参考表
+- **变量命名规范**：变量和布尔值的命名约定
+- **常量命名规范**：普通常量和模拟枚举的特殊用法
+- **函数/方法命名规范**：函数参数、事件处理器的命名指导
+- **类命名规范**：类和抽象类的命名约定
+- **React/Vue 开发**：组件、Props、Hook的命名规范
+- **决策辅助**：布尔值、函数、常量类型选择的决策流程图
+- 与《文件组织规范》和《TypeScript 编码规范》配合，共同保证代码可读性和维护性
+
+**规范来源**: 基于 **Airbnb JavaScript Style Guide**、**Google Style Guides**、**React 官方约定** 和开源社区最佳实践制定。
+
+> 💡 **注意**: TypeScript 特定的 Enum、Interface、联合类型等命名约定请参考 `typescript.mdc`
+
+## 通用命名规则
+
+| 类别       | 命名风格    | 示例                                    | 规则说明                                                           |
+| ---------- | ----------- | --------------------------------------- | ------------------------------------------------------------------ |
+| 变量       | camelCase   | `userProfile`, `isLoading`, `itemCount` | 使用名词/形容词+名词，布尔值用 `is/has/can` 前缀                   |
+| 常量       | UPPER_SNAKE | `MAX_RETRIES`, `UserRole`               | 普通常量使用 UPPER_SNAKE_CASE，模拟枚举使用 PascalCase             |
+| 函数/方法  | camelCase   | `getUserData()`, `calculateTotal()`     | 使用动词/动词短语，异步方法建议加 `Async` 后缀：`fetchDataAsync()` |
+| 类         | PascalCase  | `UserService`, `DatabaseConnection`     | 使用名词，抽象类加 `Abstract` 前缀：`AbstractRepository`           |
+| React组件  | PascalCase  | `UserCard`, `DataTable`                 | 组件名使用 PascalCase，Props接口使用 `组件名+Props`                |
+| 自定义Hook | camelCase   | `useUserData`, `useLocalStorage`        | 必须以 `use` 开头，遵循 React Hook 命名约定                        |
+
+## 变量命名规范
+
+### 核心规则
+
+1. **使用 camelCase**
+   - ✅ `userName`, `totalAmount`
+   - ❌ `user_name`, `UserName`
+
+2. **布尔值使用语义前缀**
+   - ✅ `isLoading`, `hasPermission`, `canEdit`
+   - ❌ `loading`, `permission`, `edit`
+
+#### 🎯 布尔值命名决策流程
+
+```mermaid
+graph TD
+    A[需要命名布尔值] --> B{表示状态？}
+    B -->|是| C[使用 is 前缀]
+    B -->|否| D{表示拥有/包含？}
+    D -->|是| E[使用 has 前缀]
+    D -->|否| F{表示能力/权限？}
+    F -->|是| G[使用 can 前缀]
+    F -->|否| H{表示应该/推荐？}
+    H -->|是| I[使用 should 前缀]
+    H -->|否| J[使用 is 前缀（通用）]
+
+    C --> C1[isLoading<br/>isVisible<br/>isActive]
+    E --> E1[hasPermission<br/>hasData<br/>hasError]
+    G --> G1[canEdit<br/>canAccess<br/>canSubmit]
+    I --> I1[shouldUpdate<br/>shouldRender<br/>shouldValidate]
+    J --> J1[isValid<br/>isEnabled<br/>isRequired]
+
+    style A fill:#e1f5fe
+    style C1 fill:#e8f5e8
+    style E1 fill:#e8f5e8
+    style G1 fill:#e8f5e8
+    style I1 fill:#e8f5e8
+    style J1 fill:#e8f5e8
+```
+
+3. **名词或形容词+名词组合**
+   - ✅ `userProfile`, `itemCount`, `maxRetries`
+   - ❌ `getData`, `process` (应该是函数名)
+
+### 标准格式
+
+```javascript
+// ✅ 最佳实践
+const userProfile = { name: "John" };
+const isLoading = false;
+const hasPermission = true;
+```
+
+## 常量命名规范
+
+### 核心规则
+
+1. **统一使用 UPPER_SNAKE_CASE 命名风格**
+   - ✅ 所有常量都使用 `UPPER_SNAKE_CASE`，无论导出状态或作用域
+   - ✅ 基本类型常量：`MAX_RETRIES = 3`, `API_BASE_URL = "https://api.com"`
+   - ✅ 非基本类型常量：`API_ENDPOINTS = {...}`, `SUPPORTED_FORMATS = [...]`
+
+2. **常量名应表达完整语义**
+   - ✅ `CONNECTION_TIMEOUT_MS`, `MAX_FILE_SIZE_BYTES`
+   - ❌ `TIMEOUT`, `MAX_SIZE`
+
+3. **基本类型 vs 非基本类型的区别**
+   - **基本类型** (number, string, boolean): 直接使用 `UPPER_SNAKE_CASE`
+   - **非基本类型** (object, array): 常量名使用 `UPPER_SNAKE_CASE`，内部属性/元素使用 camelCase
+
+### 标准格式
+
+```javascript
+// ✅ 基本类型常量
+export const MAX_RETRY_ATTEMPTS = 3;
+export const API_BASE_URL = "https://api.example.com";
+
+// ✅ 对象常量：对象名 UPPER_SNAKE_CASE，属性 camelCase
+const DEFAULT_CONFIG = {
+  timeoutMs: 5000,
+  maxRetries: 3,
+  apiEndpoint: "/api/v1",
+};
+
+// ✅ 数组常量
+const SUPPORTED_FORMATS = ["jpeg", "png", "webp"];
+
+// ✅ 复杂数组常量配合 interface 定义
+interface ApiEndpoint {
+  name: string;
+  path: string;
+  method?: "GET" | "POST" | "PUT" | "DELETE";
+}
+
+const API_ENDPOINTS: readonly ApiEndpoint[] = [
+  { name: "users", path: "/api/users", method: "GET" },
+  { name: "orders", path: "/api/orders", method: "POST" },
+];
+```
+
+### 🎯 常量类型选择决策
+
+```mermaid
+graph TD
+    A[需要定义常量] --> B{是否表示有限选项集合？}
+    B -->|是| C{需要类型安全？}
+    B -->|否| D[使用普通常量]
+
+    C -->|是| E{需要零运行时开销？}
+    C -->|否| F[使用普通常量对象]
+
+    E -->|是| G[使用模拟枚举]
+    E -->|否| H[使用传统 enum]
+
+    D --> D1["MAX_RETRIES = 3<br/>API_BASE_URL = ...<br/>DEFAULT_CONFIG = {...}"]
+    F --> F1["const THEME_CONFIG = {<br/>  light: {...},<br/>  dark: {...}<br/>}"]
+    G --> G1["const UserRole = {<br/>  Admin: 'ADMIN'<br/>} as const"]
+    H --> H1["enum UserRole {<br/>  Admin = 'ADMIN'<br/>}"]
+
+    style A fill:#e1f5fe
+    style D1 fill:#e8f5e8
+    style F1 fill:#fff3e0
+    style G1 fill:#e3f2fd
+    style H1 fill:#fce4ec
+```
+
+### 模拟枚举
+
+模拟枚举是常量的一种特殊用法，在 TypeScript 中用常量对象配合联合类型来模拟传统枚举行为。**模拟枚举使用 `PascalCase` 常量名**，这是唯一例外于 `UPPER_SNAKE_CASE` 规则的常量类型，目的是保持与传统枚举一致的命名风格：
+
+#### 核心示例
+
+```typescript
+// ✅ 模拟枚举：常量名和键名都用 PascalCase + as const
+export const UserRole = {
+  Admin: "ADMIN",
+  Editor: "EDITOR",
+  Viewer: "VIEWER",
+} as const;
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+// ✅ 路由枚举示例
+export const AppRoute = {
+  Home: "/",
+  Profile: "/profile",
+  Settings: "/settings",
+} as const;
+
+export type AppRoute = (typeof AppRoute)[keyof typeof AppRoute];
+```
+
+#### 为什么模拟枚举使用 PascalCase？
+
+模拟枚举使用 `PascalCase` 常量名是为了保持与传统枚举的一致性：
+
+```typescript
+// ✅ 推荐：简洁自然
+export const UserRole = {
+  Admin: "ADMIN", // 清晰
+  Editor: "EDITOR",
+} as const;
+
+// ❌ 不推荐：键值冗余
+export const UserRole = {
+  ADMIN: "ADMIN", // 重复
+  EDITOR: "EDITOR", // 重复
+} as const;
+
+// 使用：UserRole.Admin 比 UserRole.ADMIN 更自然
+// 与传统枚举使用方式保持一致：enum UserRole { Admin = "ADMIN" }
+```
+
+### 📊 命名规则对比
+
+| 常量类型     | 常量名命名         | 内部属性/元素命名      | Interface 定义         | 示例                                     |
+| ------------ | ------------------ | ---------------------- | ---------------------- | ---------------------------------------- |
+| 基本类型     | `UPPER_SNAKE_CASE` | 无                     | 不需要                 | `MAX_RETRIES = 3`                        |
+| 模拟枚举常量 | `PascalCase`       | `PascalCase`           | **推荐定义联合类型**   | `UserRole = { Admin: "ADMIN" } as const` |
+| 配置对象常量 | `UPPER_SNAKE_CASE` | `camelCase`            | 可选，复杂时推荐       | `DEFAULT_CONFIG = { timeoutMs: 5000 }`   |
+| 简单数组常量 | `UPPER_SNAKE_CASE` | 按元素类型决定         | 不需要                 | `SUPPORTED_FORMATS = ["jpeg", "png"]`    |
+| 复杂数组常量 | `UPPER_SNAKE_CASE` | 对象属性用 `camelCase` | **推荐定义 interface** | `API_ENDPOINTS: readonly ApiEndpoint[]`  |
+
+### 🎯 核心原则
+
+1. **常量名分场景**：
+   - 普通常量：使用 `UPPER_SNAKE_CASE`（如 `MAX_RETRIES`）
+   - 模拟枚举：使用 `PascalCase`（如 `UserRole`）保持与传统枚举一致
+2. **属性命名分场景**：
+   - 模拟枚举：内部键名使用 `PascalCase`（如 `UserRole.Admin`）
+   - 配置对象：内部属性使用 `camelCase`（如 `API_CONFIG.maxRetries`）
+3. **语义完整**：常量名要表达完整含义，如 `CONNECTION_TIMEOUT_MS` 而不是 `TIMEOUT`
+4. **类型安全优先**：复杂数组常量推荐定义 interface，确保类型安全
+5. **模拟枚举最佳实践**：使用 `PascalCase` 键名配合 `as const` 和联合类型，保持与传统枚举一致的使用体验
+
+### 常见错误
+
+```javascript
+// ❌ 错误：常量命名不统一
+const maxRetries = 3; // 错误：常量应使用 UPPER_SNAKE_CASE
+const timeout = 5000; // 错误：语义不完整，应为 DEFAULT_TIMEOUT
+
+// ❌ 错误：对象属性命名不当
+const ERROR_MESSAGES = {
+  invalid_email: "邮箱错误", // 错误：属性应用 camelCase
+  MAX_LENGTH_EXCEEDED: "超长", // 错误：属性应用 camelCase
+};
+
+// ❌ 错误：模拟枚举的错误命名方式
+const UserRole = {
+  ADMIN: "ADMIN",    // 错误：键名应用 PascalCase，应为 Admin
+  EDITOR: "EDITOR",  // 错误：键名应用 PascalCase，应为 Editor
+}; // 错误：缺少 as const
+
+const userStatus = {  // 错误：模拟枚举常量名应用 PascalCase，应为 UserStatus
+  active: "ACTIVE",   // 错误：键名应用 PascalCase，应为 Active
+  inactive: "INACTIVE", // 错误：键名应用 PascalCase，应为 Inactive
+} as const;
+```
+
+## 函数/方法命名规范
+
+### 核心规则
+
+1. **使用 camelCase**
+   - ✅ `getUserData`, `calculateTotal`
+   - ❌ `GetUserData`, `calculate_total`
+
+2. **动词或动词短语开头**
+   - ✅ `fetchUser()`, `validateInput()`, `processPayment()`
+   - ❌ `userData()`, `inputValid()`, `payment()`
+
+3. **异步方法添加 Async 后缀**
+   - ✅ `fetchDataAsync()`, `saveUserAsync()`
+   - ❌ `fetchData()` (如果是异步方法)
+
+4. **返回布尔值的方法使用 is/has/can 前缀**
+   - ✅ `isValidEmail()`, `hasPermission()`, `canAccess()`
+   - ❌ `validEmail()`, `permission()`, `access()`
+
+#### 🎯 函数命名决策流程
+
+```mermaid
+graph TD
+    A[需要命名函数] --> B{返回布尔值？}
+    B -->|是| C[使用 is/has/can 前缀]
+    B -->|否| D{是异步函数？}
+    D -->|是| E[添加 Async 后缀]
+    D -->|否| F{是 Props 回调？}
+    F -->|是| G[使用 on 前缀]
+    F -->|否| H[使用动词开头]
+
+    C --> C1[isValidEmail<br/>hasPermission<br/>canAccess]
+    E --> E1[fetchDataAsync<br/>saveUserAsync<br/>uploadFileAsync]
+    G --> G1[onSubmit<br/>onSuccess<br/>onChange]
+    H --> H1[saveData<br/>editProfile<br/>switchView<br/>formatCurrency<br/>validateForm]
+
+    style A fill:#e1f5fe
+    style C1 fill:#e8f5e8
+    style E1 fill:#e8f5e8
+    style G1 fill:#e8f5e8
+    style H1 fill:#e8f5e8
+```
+
+### UI 事件绑定最佳实践
+
+基于项目实践经验，以下是 UI 事件绑定的推荐方式：
+
+#### 🎯 事件绑定决策规则
+
+| 场景             | 推荐写法     | 示例                                    | 说明                 |
+| ---------------- | ------------ | --------------------------------------- | -------------------- |
+| **无参数函数**   | 直接传递引用 | `onClick={saveData}`                    | 最简洁，性能最优     |
+| **有参数函数**   | 内联调用     | `onClick={() => switchView("profile")}` | 参数可见，逻辑清晰   |
+| **Props 回调**   | `on` + 动作  | `onSubmit`, `onClick`                   | 组件对外接口         |
+| **复杂事件处理** | 动词开头     | `submitForm`, `uploadFile`              | 语义化命名，避免前缀 |
+
+#### 🔍 实践指导原则
+
+**1. 优先使用直接引用（无参数函数）**
+
+```typescript
+// ✅ 推荐：直接传递函数引用
+<button onClick={saveData}>保存</button>
+<button onClick={resetForm}>重置</button>
+<button onClick={editProfile}>编辑</button>
+
+// ❌ 避免：不必要的箭头函数包装
+<button onClick={() => saveData()}>保存</button>
+```
+
+**2. 有参数时使用内联调用**
+
+```typescript
+// ✅ 推荐：参数清晰可见
+<button onClick={() => switchView("profile")}>个人资料</button>
+<button onClick={() => deleteItem(item.id)}>删除</button>
+<input onChange={(e) => setName(e.target.value)} />
+
+// ❌ 避免：为了统一而创造无意义的包装
+const handleProfileClick = () => switchView("profile");
+const handleSettingsClick = () => switchView("settings");
+```
+
+**3. 复杂逻辑时使用专门函数**
+
+```typescript
+// ✅ 复杂逻辑才需要专门的处理函数
+const submitForm = (event: FormEvent) => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!validateForm()) return;
+
+  submitData();
+  trackEvent('form_submit');
+  showSuccessMessage();
+};
+
+<form onSubmit={submitForm}>
+```
+
+**4. Props 回调保持 `on` 前缀**
+
+```typescript
+// ✅ 组件对外接口
+interface ButtonProps {
+  onSubmit?: (data: FormData) => void;
+  onSuccess?: (result: any) => void;
+}
+```
+
+#### 🏆 核心原则
+
+1. **简洁优先** - 能用直接引用就不用箭头函数
+2. **逻辑透明** - 参数和调用意图要清晰可见
+3. **语义化命名** - 用动词开头表达实际操作，避免技术前缀
+4. **避免过度抽象** - 不要为了命名规范而创造空壳函数
+5. **复杂时分离** - 只有真正复杂的逻辑才需要专门的处理函数
+
+### 参数命名规范
+
+1. **使用 camelCase**
+   - ✅ `userName`, `userId`, `pageSize`
+   - ❌ `user_name`, `UserName`, `PAGE_SIZE`
+
+2. **参数名要具体明确**
+   - ✅ `function updateUser(userId: string, userData: UserData)`
+   - ❌ `function updateUser(id: string, data: any)`
+
+3. **回调函数参数使用语义化命名**
+   - ✅ `onSuccess`, `onError`, `onComplete`
+   - ❌ `callback`, `cb`, `fn`
+
+4. **选项对象参数使用 options 或具体名称**
+   - ✅ `fetchUsers(options: FetchOptions)`
+   - ✅ `createChart(config: ChartConfig)`
+   - ❌ `fetchUsers(params: any)`
+
+### 标准格式
+
+```javascript
+// ✅ 最佳实践
+function getUserData(userId: string) {}
+async function fetchDataAsync(endpoint: string, options?: RequestOptions) {}
+function isValidEmail(emailAddress: string) {}
+function processItems(itemList: Item[], onProgress?: (progress: number) => void) {}
+```
+
+## 类命名规范
+
+### 核心规则
+
+1. **使用 PascalCase**
+   - ✅ `UserService`, `DatabaseConnection`
+   - ❌ `userService`, `database_connection`
+
+2. **使用名词或名词短语**
+   - ✅ `PaymentProcessor`, `DataValidator`
+   - ❌ `ProcessPayment`, `ValidateData`
+
+3. **抽象类添加 Abstract 前缀**
+   - ✅ `AbstractRepository`, `AbstractService`
+   - ❌ `BaseRepository`, `ServiceBase`
+
+4. **实现类可添加 Impl 后缀（可选）**
+   - ✅ `UserServiceImpl`, `PaymentProcessorImpl`
+   - ✅ `ConcreteUserService` (替代方案)
+
+### 标准格式
+
+```javascript
+// ✅ 最佳实践
+class UserService {}
+class AbstractRepository {}
+class UserRepositoryImpl extends AbstractRepository {}
+```
+
+## React/Vue 组件命名规范
+
+### 组件相关命名
+
+1. **组件 Props 命名**
+   - ✅ `interface ButtonProps { size?: 'small' | 'large'; onClick?: () => void; }`
+   - ❌ `interface button_props { Size?: string; click?: Function; }`
+
+2. **事件处理器命名**
+   - ✅ `onSubmit`, `onUserClick`, `onDataChange`
+   - ❌ `submit`, `userClick`, `dataChange`
+
+3. **组件状态命名**
+   - ✅ `const [isLoading, setIsLoading] = useState(false)`
+   - ❌ `const [loading, setLoading] = useState(false)`
+
+4. **自定义 Hook 命名**
+   - ✅ `useUserData`, `useLocalStorage`, `useApiCall`
+   - ❌ `getUserData`, `localStorageHook`, `apiCall`
+
+#### 🎯 Hook 特例法则
+
+**"Hook 用 use 起，一个全名多个域"**
+
+| 场景类型         | 命名策略            | 示例                       | 说明                                 |
+| ---------------- | ------------------- | -------------------------- | ------------------------------------ |
+| **单个Hook文件** | `use` + 功能名      | `useWindowSize.ts`         | 文件包含一个Hook，直接用Hook名       |
+| **关联Hook集合** | 业务域名称          | `table.ts`                 | 包含 `usePagination`, `useSelection` |
+| **禁止用法**     | ❌ Hook名 + `Hooks` | ❌ `usePaginationHooks.ts` | 语义重复，违反命名原则               |
+
+#### 💡 Hook文件命名决策
+
+```mermaid
+graph TD
+    A[需要创建Hook文件] --> B{文件包含几个Hook？}
+    B -->|一个| C[使用Hook名: useWindowSize.ts]
+    B -->|多个相关| D[使用业务域: table.ts]
+    B -->|多个无关| E[拆分为独立文件]
+
+    C --> F[✅ 语义清晰]
+    D --> F
+    E --> F
+
+    style A fill:#e1f5fe
+    style F fill:#e8f5e8
+```
+
+#### 📁 Hook目录组织示例
+
+```
+src/hooks/
+├── table.ts           # Hook集合：包含 usePagination, useSelection, useSorting
+├── form.ts            # Hook集合：包含 useValidation, useSubmit, useReset
+├── useWindowSize.ts   # 单个Hook：窗口尺寸监听
+├── useLocalStorage.ts # 单个Hook：本地存储
+└── useDebounce.ts     # 单个Hook：防抖功能
+```
+
+> 💡 **核心原则**: 在 `hooks/` 目录下，文件名本身已表明Hook性质，无需 `-hooks` 后缀
+
+#### 🎯 React/Vue 组件命名决策
+
+```mermaid
+graph TD
+    A[组件相关命名] --> B{是什么类型？}
+    B -->|组件名| C[PascalCase]
+    B -->|Props接口| D[组件名 + Props]
+    B -->|事件处理| E[on + 动作名]
+    B -->|状态变量| F[camelCase + set前缀]
+    B -->|自定义Hook| G[use + 功能名]
+
+    C --> C1[UserCard<br/>DataTable<br/>LoginForm]
+    D --> D1[UserCardProps<br/>DataTableProps<br/>LoginFormProps]
+    E --> E1[onSubmit<br/>onUserSelect<br/>onDataChange]
+    F --> F1[isLoading, setIsLoading<br/>userData, setUserData]
+    G --> G1[useUserData<br/>useLocalStorage<br/>useApiCall]
+
+    style A fill:#e1f5fe
+    style C1 fill:#e8f5e8
+    style D1 fill:#e8f5e8
+    style E1 fill:#e8f5e8
+    style F1 fill:#e8f5e8
+    style G1 fill:#e8f5e8
+```
+
+### 标准格式
+
+```typescript
+// ✅ React 组件示例
+interface UserCardProps {
+  user: User;
+  size?: 'small' | 'large';
+  onUserClick?: (userId: string) => void;
+}
+
+const UserCard: React.FC<UserCardProps> = ({ user, size = 'small', onUserClick }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleExpandToggle = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  return (
+    <div onClick={() => onUserClick?.(user.id)}>
+      {/* 组件内容 */}
+    </div>
+  );
+};
+
+// ✅ 自定义 Hook 示例
+const useUserData = (userId: string) => {
+  const [userData, setUserData] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Hook 逻辑
+
+  return { userData, isLoading, refetch: fetchUserData };
+};
+```

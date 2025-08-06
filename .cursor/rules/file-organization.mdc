@@ -1,0 +1,943 @@
+---
+alwaysApply: true
+appliesTo:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+---
+
+# 文件组织规范
+
+## 规范说明
+
+本规范旨在建立统一的文件组织标准，涵盖文件命名、目录结构、导出方式等多个方面，提高代码可读性、可维护性和构建性能。规范基于业界最佳实践，确保文件能够清晰表达其业务职责和功能范围。
+
+> 📋 **配合使用**: 本规范适用于整个项目的文件组织，与《页面架构规范》和《代码标识符命名规范》配合使用
+
+## 核心原则
+
+### 🎯 语义优先法则
+
+**"文件命名必须反映其内容本质，而非机械匹配规则"**
+
+#### 核心判断标准
+
+| 内容本质     | 命名策略     | 示例                                     |
+| ------------ | ------------ | ---------------------------------------- |
+| **独立实体** | 使用单数形式 | `user.ts`, `payment.ts`, `config.ts`     |
+| **实体集合** | 使用复数形式 | `users.ts`, `arrays.ts`, `validators.ts` |
+| **抽象概念** | 使用单数形式 | `auth.ts`, `permission.ts`, `layout.ts`  |
+| **功能模块** | 使用业务术语 | `validation.ts`, `api.ts`, `business.ts` |
+
+#### 🎯 决策口诀
+
+> 💡 **"独立单数走，集合复数行，概念永单数，业务语义明"**
+
+### 🏗️ 目录-文件层次法则
+
+**"目录是容器，文件是内容；目录表范畴，文件表实体"**
+
+- **目录（容器）**：定义业务范畴和功能分类
+- **文件（内容）**：实现具体的业务实体或功能模块
+- **层次清晰**：目录结构反映业务架构，文件命名反映具体职责
+
+### 🎯 领域分组优于命名前缀法则
+
+**"当同一领域存在多个文件时，使用目录分组而非文件名前缀"**
+
+#### 核心原则
+
+当某个业务领域下有 **2个以上相关文件** 时，应该创建领域目录进行分组，而不是使用命名前缀。
+
+#### 🎯 组织决策规则
+
+| 文件数量              | 组织方式 | 示例                                  |
+| --------------------- | -------- | ------------------------------------- |
+| **单个领域文件**      | 直接平铺 | `edit-button.ts`, `auth-service.ts`   |
+| **2个以上同领域文件** | 领域分组 | `user/profile.ts`, `user/settings.ts` |
+| **跨模块通用文件**    | 提升层级 | `src/utils/format.ts`                 |
+
+#### ✅ 推荐：领域分组模式
+
+```
+src/
+├── utils/
+│   ├── date/              # 日期工具领域
+│   │   ├── format.ts
+│   │   └── validate.ts
+│   └── string/            # 字符串工具领域
+│       ├── format.ts
+│       └── transform.ts
+├── components/
+│   ├── user/              # 用户组件领域
+│   │   ├── avatar.tsx
+│   │   └── profile.tsx
+│   └── order/             # 订单组件领域
+│       └── summary.tsx
+└── constants/
+    ├── api/               # API常量领域
+    │   └── endpoints.ts
+    └── user/              # 用户常量领域
+        └── roles.ts
+```
+
+#### ❌ 避免：命名前缀模式
+
+```
+src/
+├── utils/
+│   ├── date-format.ts         # ❌ 应该分组
+│   ├── string-format.ts       # ❌ 应该分组
+│   └── string-transform.ts    # ❌ 应该分组
+├── components/
+│   ├── user-avatar.tsx        # ❌ 命名冗余
+│   ├── user-profile.tsx       # ❌ 命名冗余
+│   └── order-summary.tsx      # ❌ 命名冗余
+└── constants/
+    ├── api-endpoints.ts       # ❌ 应该分组
+    └── user-roles.ts          # ❌ 应该分组
+```
+
+#### 🏆 领域分组优势
+
+1. **命名简洁**：去除冗余前缀，`profile.ts` vs `user-profile.ts`
+2. **领域内聚**：相关文件归类，业务逻辑清晰
+3. **导入清晰**：路径体现领域关系
+4. **维护友好**：修改某个领域时文件集中
+
+#### 📝 导入路径对比
+
+```typescript
+// ✅ 领域分组：路径清晰，语义明确
+import { formatDate } from "../utils/date/format";
+import UserAvatar from "../components/user/avatar";
+
+// ❌ 命名前缀：路径冗余，缺乏层次
+import { formatDate } from "../utils/date-format";
+import UserAvatar from "../components/user-avatar";
+```
+
+### 🔀 跨领域函数决策规则
+
+**"当多个领域存在功能重叠时，以主要职责和专业化程度为决策依据"**
+
+#### 🎯 决策原则
+
+当遇到功能重叠的情况（如格式化函数既可以放在格式化工具集合中，也可以放在特定领域中），按以下优先级决策：
+
+| 优先级  | 决策依据           | 示例说明                                          |
+| ------- | ------------------ | ------------------------------------------------- |
+| 🔴 最高 | **领域专业化程度** | 日期格式化放在 `dates.ts`，因为其高度专业化于日期 |
+| 🟠 次高 | **主要职责归属**   | 通用格式化放在 `formatters.ts`，职责是格式化      |
+| 🟡 中等 | **使用频率**       | 更常用的功能优先考虑其主要使用场景                |
+| 🟢 较低 | **团队约定**       | 团队统一约定某类函数的归属                        |
+
+#### ✅ 决策示例：日期格式化 vs 通用格式化
+
+```typescript
+// ✅ 正确：日期专业化函数放在 dates.ts
+// utils/dates.ts
+export const formatDate = (date: Date, locale = "zh-CN"): string => {
+  return date.toLocaleDateString(locale);
+};
+
+export const formatRelativeTime = (date: Date): string => {
+  // 日期相对时间格式化 - 高度专业化于日期领域
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+  if (diffInMinutes < 1) return "刚刚";
+  if (diffInMinutes < 60) return `${diffInMinutes}分钟前`;
+  // ... 更多日期特定逻辑
+};
+
+// ✅ 正确：通用格式化函数放在 formatters.ts
+// utils/formatters.ts
+export const formatCurrency = (amount: number, currency = "CNY"): string => {
+  return new Intl.NumberFormat("zh-CN", {
+    style: "currency",
+    currency,
+  }).format(amount);
+};
+
+export const formatPhoneNumber = (phone: string): string => {
+  // 电话号码格式化 - 通用文本格式化
+  const cleaned = phone.replace(/\D/g, "");
+  const match = cleaned.match(/^(\d{3})(\d{4})(\d{4})$/);
+  return match ? `${match[1]}-${match[2]}-${match[3]}` : phone;
+};
+```
+
+#### 🎯 跨领域函数决策流程
+
+```mermaid
+graph TD
+    A["🤔 函数应该放在哪里？"] --> B{"是否高度专业化于某个领域？"}
+
+    B -->|是| C["✅ 放在专业领域文件"]
+    B -->|否| D{"主要职责是什么？"}
+
+    D --> E["格式化"] --> F["formatters.ts"]
+    D --> G["验证"] --> H["validators.ts"]
+    D --> I["转换"] --> J["converters.ts"]
+    D --> K["计算"] --> L["calculators.ts"]
+
+    C --> M["🏆 决策完成"]
+    F --> M
+    H --> M
+    J --> M
+    L --> M
+
+    style A fill:#e1f5fe
+    style C fill:#e8f5e8
+    style M fill:#fce4ec
+    style F fill:#fff3e0
+    style H fill:#fff3e0
+    style J fill:#fff3e0
+    style L fill:#fff3e0
+```
+
+#### 📋 常见重叠场景决策表
+
+| 功能类型   | 专业化场景                 | 通用场景                      | 函数归属决策                                           |
+| ---------- | -------------------------- | ----------------------------- | ------------------------------------------------------ |
+| **格式化** | `formatDate` (日期专用)    | `formatCurrency` (通用格式化) | 专业化函数 → `dates.ts`<br/>通用函数 → `formatters.ts` |
+| **验证**   | `isValidEmail` (邮箱专用)  | `isEmpty` (通用验证)          | 专业化函数 → `email.ts`<br/>通用函数 → `validators.ts` |
+| **转换**   | `parseJsonDate` (日期专用) | `toSlug` (通用转换)           | 专业化函数 → `dates.ts`<br/>通用函数 → `converters.ts` |
+| **计算**   | `calculateAge` (日期计算)  | `sum` (数学计算)              | 专业化函数 → `dates.ts`<br/>通用函数 → `math.ts`       |
+
+#### ❌ 错误的决策示例
+
+```typescript
+// ❌ 错误：将日期专用函数放在通用格式化中
+// utils/formatters.ts
+export const formatDate = (date: Date): string => {
+  return date.toLocaleDateString("zh-CN");
+};
+
+export const formatRelativeTime = (date: Date): string => {
+  // 这个函数高度专业化于日期，应该在 dates.ts 中
+};
+
+// ❌ 错误：将通用格式化放在日期文件中
+// utils/dates.ts
+export const formatCurrency = (amount: number): string => {
+  // 这是通用格式化，不属于日期领域
+  return new Intl.NumberFormat("zh-CN").format(amount);
+};
+```
+
+#### 🏆 最佳实践总结
+
+1. **专业化优先**：优先考虑函数的专业化程度，专业化函数归属专业领域
+2. **职责清晰**：每个文件的职责要明确，避免职责模糊
+3. **团队约定**：建立团队内统一的归属约定，保持一致性
+
+## 文件命名规范
+
+### 📊 复数/单数命名规范
+
+根据文件和目录的性质，决定使用复数还是单数形式的命名。
+
+#### 🏗️ 目录-文件关系原理
+
+**目录命名体现容器属性，文件命名体现内容本质**
+
+| 层级类型 | 命名逻辑                | 示例说明                              |
+| -------- | ----------------------- | ------------------------------------- |
+| **目录** | 按容器性质决定复数/单数 | `components/` (容器装多个组件) → 复数 |
+|          |                         | `auth/` (抽象概念领域) → 单数         |
+| **文件** | 按内容本质决定复数/单数 | `button.tsx` (单一组件) → 单数        |
+|          |                         | `arrays.ts` (工具函数集合) → 复数     |
+
+#### 🎯 决策流程
+
+```mermaid
+graph TD
+    A[文件还是目录？]
+    A --> B[目录]
+    A --> C[文件]
+
+    B --> D{是否包含多个同类实体？}
+    D -->|是| E[用复数：utils/ components/]
+    D -->|否| F[用单数：auth/ layout/]
+
+    C --> G{是否表示独立实体？}
+    G -->|是| H[用单数：user.ts button.tsx]
+    G -->|否| I{是否包含工具函数集合？}
+    I -->|是| J[用复数：arrays.ts dates.ts]
+    I -->|否| K[用单数：logger.ts config.ts]
+```
+
+#### 📁 目录命名规则
+
+| 类型           | 使用复数                                                                              | 使用单数                                            |
+| -------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **集合型目录** | `components/`<br/>`utils/`<br/>`constants/`<br/>`types/`<br/>`services/`<br/>`hooks/` |                                                     |
+| **功能型目录** |                                                                                       | `auth/`<br/>`layout/`<br/>`admin/`<br/>`dashboard/` |
+| **业务型目录** | `pages/`<br/>`views/`<br/>`models/`                                                   | `home/`<br/>`user-profile/`<br/>`order-detail/`     |
+
+#### 📄 文件命名规则
+
+| 类型              | 使用复数                                       | 使用单数                                    |
+| ----------------- | ---------------------------------------------- | ------------------------------------------- |
+| **独立实体文件**  |                                                | `user.ts`<br/>`button.tsx`<br/>`payment.ts` |
+| **工具函数集合**  | `arrays.ts`<br/>`dates.ts`<br/>`validators.ts` |                                             |
+| **配置/服务文件** |                                                | `config.ts`<br/>`logger.ts`<br/>`router.ts` |
+
+#### ✅ 推荐示例
+
+```
+src/
+├── components/              # 复数：包含多个组件
+│   ├── button/             # 单数：独立组件
+│   └── card/               # 单数：独立组件
+├── constants/              # 复数：包含多个常量文件
+│   ├── api.ts              # 单数：API相关常量
+│   ├── user.ts             # 单数：用户相关常量
+│   ├── validators.ts       # 复数：验证器集合常量
+│   └── formatters.ts       # 复数：格式化器集合常量
+├── utils/                  # 复数：包含多个工具文件
+│   ├── arrays.ts           # 复数：工具函数集合
+│   ├── dates.ts            # 复数：工具函数集合
+│   └── logger.ts           # 单数：单一功能
+├── auth/                   # 单数：功能模块
+│   ├── login.ts            # 单数：独立功能
+│   └── permission.ts       # 单数：独立功能
+├── pages/                  # 复数：包含多个页面
+│   ├── home/               # 单数：具体页面
+│   └── user-profile/       # 单数：具体页面
+└── types/                  # 复数：包含多个类型文件
+    ├── user.ts             # 单数：独立实体类型
+    └── api.ts              # 单数：独立模块类型
+```
+
+#### ❌ 错误示例
+
+```
+src/
+├── component/              # ❌ 应该用复数 components/
+├── constant/               # ❌ 应该用复数 constants/
+│   ├── index.ts            # ❌ 禁止使用 index.ts
+│   ├── common.ts           # ❌ 名称过于模糊
+│   └── config.ts           # ❌ 应该具体化为业务领域
+├── util/                   # ❌ 应该用复数 utils/
+├── array-util.ts           # ❌ 工具集合应该用复数 arrays.ts
+├── auths/                  # ❌ 功能模块应该用单数 auth/
+├── page/                   # ❌ 页面容器应该用复数 pages/
+└── users.ts                # ❌ 独立实体应该用单数 user.ts
+```
+
+#### 🎯 关键判断要点
+
+1. **目录名判断**：
+   - 包含多个同类文件 → 复数（`components/`, `utils/`, `constants/`）
+   - 表示单一功能模块 → 单数（`auth/`, `layout/`）
+
+2. **文件名判断**：
+   - 独立实体或模块 → 单数（`user.ts`, `api.ts`, `payment.ts`）
+   - 工具函数集合 → 复数（`arrays.ts`, `validators.ts`）
+
+3. **业务语义优先**：
+   - 遵循业务领域的自然语言习惯
+   - 保持团队内部的一致性
+
+### 📁 目录分类规则
+
+| 目录类型        | index 文件规则 | 命名约定                          | 说明               |
+| --------------- | -------------- | --------------------------------- | ------------------ |
+| **views/**      | ✅ 允许        | `index.tsx` + `index.module.scss` | 视图组件的入口文件 |
+| **components/** | ✅ 允许        | `index.tsx` + `index.module.scss` | UI 组件的入口文件  |
+| **constants/**  | ❌ 禁止        | `[business-domain].ts`            | 业务常量文件       |
+| **types/**      | ❌ 禁止        | `[business-domain].ts`            | 业务类型文件       |
+| **utils/**      | ❌ 禁止        | `[function-domain].ts`            | 功能工具文件       |
+| **models/**     | ❌ 禁止        | `[business-entity].ts`            | 业务逻辑文件       |
+| **services/**   | ❌ 禁止        | `[service-domain].ts`             | 服务接口文件       |
+| **hooks/**      | ❌ 禁止        | `[hook-purpose].ts`               | 自定义 hooks       |
+
+## 文件导出规范
+
+### 🚀 导出方式规范
+
+为了优化构建体积和支持 Tree Shaking，对不同类型文件的导出方式进行规范。
+
+#### 🎯 导出方式决策流程
+
+```mermaid
+graph LR
+    A["📁 文件类型"] --> B["🎨 组件文件<br/>(components/ views/)"]
+    A --> C["⚙️ 业务逻辑文件<br/>(constants/ utils/ types/ models/)"]
+
+    B --> B1["✅ export default<br/>符合 React 习惯"]
+    B1 --> B2["import Button from './button'<br/>import Main from './main'"]
+
+    C --> C1["✅ export 命名导出<br/>支持 Tree Shaking"]
+    C1 --> C2["import { API_ENDPOINTS, HttpStatus } from './api'<br/>import { formatCurrency } from './utils'"]
+
+    B2 --> D["🎯 最终效果"]
+    C2 --> D
+    D --> E["📦 构建体积优化<br/>🌳 Tree Shaking 友好<br/>📚 代码可维护性"]
+
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style B1 fill:#c8e6c9
+    style C1 fill:#c8e6c9
+    style D fill:#f3e5f5
+    style E fill:#fce4ec
+```
+
+#### ✅ 推荐做法
+
+**组件文件（允许 default 导出）：**
+
+```typescript
+// ✅ components/button/index.tsx
+const Button = ({ children, onClick }: ButtonProps) => {
+  return <button onClick={onClick}>{children}</button>;
+};
+
+export default Button;
+```
+
+```typescript
+// ✅ views/main/index.tsx
+const Main = () => {
+  return <div>主页面内容</div>;
+};
+
+export default Main;
+```
+
+**业务逻辑文件（只能命名导出）：**
+
+```typescript
+// ✅ constants/api.ts
+// 配置对象常量：常量名 UPPER_SNAKE_CASE，属性 camelCase
+export const API_ENDPOINTS = {
+  userProfile: "/api/user/profile",
+  uploadAvatar: "/api/user/avatar",
+  userSettings: "/api/user/settings",
+};
+
+// ✅ 模拟枚举：常量名和键名都用 PascalCase + as const
+export const HttpStatus = {
+  Ok: 200,
+  Created: 201,
+  BadRequest: 400,
+  NotFound: 404,
+  InternalServerError: 500,
+} as const;
+
+export type HttpStatus = (typeof HttpStatus)[keyof typeof HttpStatus];
+```
+
+```typescript
+// ✅ utils/format.ts
+export const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat("zh-CN", {
+    style: "currency",
+    currency: "CNY",
+  }).format(amount);
+};
+
+export const formatDate = (date: Date): string => {
+  return date.toLocaleDateString("zh-CN");
+};
+```
+
+```typescript
+// ✅ types/user.ts
+export interface UserProfile {
+  id: string;
+  displayName: string;
+  avatar: string;
+}
+
+export interface UserPreferences {
+  language: string;
+  timezone: string;
+  notifications: boolean;
+}
+```
+
+#### ❌ 避免做法
+
+**业务逻辑文件不要用 default 导出：**
+
+```typescript
+// ❌ constants/api.ts - 错误：使用了 default 导出
+const API_ENDPOINTS = {
+  userProfile: "/api/user/profile",
+  uploadAvatar: "/api/user/avatar",
+};
+
+export default API_ENDPOINTS; // ❌ 应该用命名导出
+```
+
+```typescript
+// ❌ utils/format.ts - 错误：混合导出
+export const formatCurrency = (amount: number) => {
+  /* ... */
+};
+
+const formatUtils = {
+  formatCurrency,
+  formatDate: (date: Date) => {
+    /* ... */
+  },
+};
+
+export default formatUtils; // ❌ 应该单独导出每个函数
+```
+
+```typescript
+// ❌ types/user.ts - 错误：类型用 default 导出
+interface UserProfile {
+  id: string;
+  name: string;
+}
+
+export default UserProfile; // ❌ 类型应该用命名导出
+```
+
+#### 🎯 优化效果
+
+**Tree Shaking 优化对比：**
+
+```typescript
+// ✅ 命名导出 - 支持 Tree Shaking
+// utils/format.ts
+export const formatCurrency = () => {
+  /* ... */
+};
+export const formatDate = () => {
+  /* ... */
+};
+
+// utils/validation.ts
+export const validateEmail = () => {
+  /* ... */
+};
+
+// 使用时：只打包实际使用的函数
+import { formatCurrency } from "./utils/format";
+formatCurrency(100);
+
+// ❌ default 导出 - 无法 Tree Shaking
+// utils/index.ts
+export default {
+  formatCurrency,
+  formatDate,
+  validateEmail,
+  // ... 50+ 个工具函数
+};
+
+// 使用时：即使只用一个函数，也会打包所有函数
+import utils from "./utils";
+utils.formatCurrency(100);
+```
+
+#### 🔧 导入语法对比
+
+```typescript
+// ✅ 业务逻辑导入（命名导出） - 推荐优先使用
+import { API_ENDPOINTS, HttpStatus } from "@/constants/api";
+import { formatCurrency, formatDate } from "@/utils/format";
+import { UserProfile, UserPreferences } from "@/types/user";
+
+// ✅ 组件导入（default 导出） - 组件专用
+import Button from "@/components/button";
+import Main from "@/views/main";
+```
+
+#### 📊 规范总结
+
+1. **业务逻辑强制命名导出**：优化 Tree Shaking 效果，支持按需导入
+2. **组件优先使用 default 导出**：符合 React 生态习惯
+3. **避免混合导出**：保持导出方式的一致性
+4. **Tree Shaking 友好**：优先使用命名导出减少最终构建体积
+
+## 详细目录规范
+
+### 📁 constants/ 目录
+
+#### 🎯 Constants 命名决策流程
+
+```mermaid
+graph TD
+    A["需要定义常量"] --> B{"这个常量属于哪个业务领域？"}
+
+    B --> C["表单验证"] --> C1["validation.ts"]
+    B --> D["API接口"] --> D1["api.ts"]
+    B --> E["支付相关"] --> E1["payment.ts"]
+    B --> F["用户管理"] --> F1["user.ts"]
+    B --> G["业务流程"] --> G1["business.ts"]
+    B --> H["权限控制"] --> H1["permission.ts"]
+    B --> I["其他具体领域"] --> I1["使用具体业务术语<br/>如: workflow.ts, review.ts"]
+
+    C1 --> J["✅ 文件名规则"]
+    D1 --> J
+    E1 --> J
+    F1 --> J
+    G1 --> J
+    H1 --> J
+    I1 --> J
+
+    J --> K["• 使用单数形式<br/>• 业务语义明确<br/>• 避免模糊术语<br/>• 禁用 index.ts"]
+
+    style A fill:#e1f5fe
+    style B fill:#fff3e0
+    style J fill:#f3e5f5
+    style K fill:#c8e6c9
+```
+
+#### 📋 核心命名规则
+
+1. **按功能性质命名** - 独立业务领域用单数形式，工具函数集合用复数形式
+2. **业务语义优先** - 用具体的业务领域术语命名
+3. **避免泛化命名** - 不使用 `rules`, `config`, `common` 等模糊词汇
+4. **禁用 index.ts** - 常量文件不允许使用 index 文件
+
+#### ✅ 推荐命名
+
+```
+src/constants/
+├── api.ts              # API 相关常量
+├── user.ts             # 用户相关常量
+├── validators.ts       # 验证器集合常量（复数：工具函数集合）
+└── formatters.ts       # 格式化器集合常量（复数：工具函数集合）
+
+pages/user-profile/constants/
+├── profile-form.ts     # 用户资料表单常量
+├── avatar-upload.ts    # 头像上传常量
+└── privacy-settings.ts # 隐私设置常量
+```
+
+#### ❌ 避免命名
+
+```
+src/constants/
+├── index.ts           # ❌ 模糊，无法表达业务意图
+├── enums.ts           # ❌ 技术术语，缺乏业务语义
+├── common.ts          # ❌ 过于宽泛
+├── config.ts          # ❌ 模糊，应该具体化
+├── rules.ts           # ❌ 泛化术语，缺乏业务语义
+├── form-rules.ts      # ❌ 应该更具体：validation.ts
+└── business-rules.ts  # ❌ 应该更具体：business.ts
+```
+
+#### 🎯 单数/复数命名说明
+
+**关键原则：constants 目录下文件按功能性质选择单数或复数形式**
+
+| 错误命名            | 正确命名        | 说明                       |
+| ------------------- | --------------- | -------------------------- |
+| `rules.ts`          | `validation.ts` | 用具体业务术语替代泛化词汇 |
+| `form-rules.ts`     | `validation.ts` | 表单验证规则用 validation  |
+| `business-rules.ts` | `business.ts`   | 业务规则直接用 business    |
+| `api-rules.ts`      | `api.ts`        | API 相关常量直接用 api     |
+| `user-rules.ts`     | `user.ts`       | 用户相关常量直接用 user    |
+| `validator.ts`      | `validators.ts` | 验证器集合应用复数形式     |
+| `formatter.ts`      | `formatters.ts` | 格式化器集合应用复数形式   |
+
+#### 示例对比
+
+```typescript
+// ✅ 正确：业务明确的单数文件名
+// constants/validation.ts - 表单验证相关常量
+export const FORM_VALIDATION = {
+  usernameMaxLength: 50,
+  passwordMinLength: 8,
+  emailPattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+};
+
+// constants/business.ts - 业务流程相关常量
+export const BUSINESS_CONSTRAINTS = {
+  minUserAge: 18,
+  maxOrderItems: 100,
+  defaultCurrency: "CNY",
+};
+
+// constants/api.ts - API接口相关常量
+export const API_CONFIG = {
+  timeoutMs: 5000,
+  maxRetryAttempts: 3,
+  baseUrl: "/api/v1",
+};
+```
+
+### 📁 types/ 目录
+
+#### ✅ 推荐命名
+
+```
+src/types/
+├── api.ts              # API 响应类型
+├── form.ts             # 表单数据类型
+├── user.ts             # 用户相关类型
+└── payment.ts          # 支付相关类型
+
+pages/order-management/types/
+├── order.ts            # 订单类型
+├── shipping.ts         # 配送类型
+└── invoice.ts          # 发票类型
+```
+
+#### ❌ 避免命名
+
+```
+src/types/
+├── index.ts           # ❌ 无法表达类型用途
+├── interfaces.ts      # ❌ 技术术语，缺乏业务含义
+├── common.ts          # ❌ 过于宽泛
+└── global.ts          # ❌ 范围模糊
+```
+
+#### 示例对比
+
+```typescript
+// ✅ 正确：业务明确的类型定义
+// types/user.ts
+export interface UserProfile {
+  id: string;
+  displayName: string;
+  avatar: string;
+}
+
+export interface UserPreferences {
+  language: string;
+  timezone: string;
+  notifications: boolean;
+}
+
+// ❌ 错误：模糊的类型定义
+// types/index.ts
+export interface User {
+  id: string;
+  name: string;
+}
+```
+
+### 📁 utils/ 目录
+
+#### ✅ 推荐命名
+
+```
+src/utils/
+├── format.ts           # 格式化工具
+├── validation.ts       # 验证工具
+├── dates.ts            # 日期处理工具
+├── currency.ts         # 货币处理工具
+└── files.ts            # 文件处理工具
+
+pages/data-analysis/utils/
+├── chart.ts            # 图表工具
+├── statistics.ts       # 统计工具
+└── export.ts           # 导出工具
+```
+
+#### ❌ 避免命名
+
+```
+src/utils/
+├── index.ts           # ❌ 无法表达工具用途
+├── helpers.ts         # ❌ 过于宽泛
+├── common.ts          # ❌ 缺乏具体含义
+└── tools.ts           # ❌ 模糊表达
+```
+
+#### 示例对比
+
+```typescript
+// ✅ 正确：功能明确的工具函数
+// utils/currency.ts
+export const formatCurrency = (amount: number, currency: string): string => {
+  return new Intl.NumberFormat("zh-CN", {
+    style: "currency",
+    currency: currency,
+  }).format(amount);
+};
+
+export const parseCurrencyInput = (input: string): number => {
+  return parseFloat(input.replace(/[^\d.-]/g, ""));
+};
+
+// utils/validation.ts
+export const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+export const validatePhoneNumber = (phone: string): boolean => {
+  const phoneRegex = /^1[3-9]\d{9}$/;
+  return phoneRegex.test(phone);
+};
+
+// ❌ 错误：模糊的工具函数
+// utils/index.ts
+export const formatData = (data: any) => {
+  /* ... */
+};
+export const validateInput = (input: any) => {
+  /* ... */
+};
+```
+
+### 📁 models/ 目录
+
+#### ✅ 推荐命名
+
+```
+pages/user-profile/models/
+├── page.ts             # 页面主逻辑容器
+├── profile-form.ts     # 资料表单逻辑
+├── avatar-upload.ts    # 头像上传逻辑
+└── settings.ts         # 设置相关逻辑
+```
+
+#### ❌ 避免命名
+
+```
+pages/user-profile/models/
+├── index.ts           # ❌ 无法表达逻辑职责
+├── hooks.ts           # ❌ 技术术语，缺乏业务含义
+└── state.ts           # ❌ 过于宽泛
+```
+
+### 📁 services/ 目录
+
+#### ✅ 推荐命名
+
+```
+src/services/
+├── user-service.ts     # 用户服务接口
+├── payment-service.ts  # 支付服务接口
+├── upload-service.ts   # 上传服务接口
+└── auth-service.ts     # 认证服务接口
+```
+
+#### ❌ 避免命名
+
+```
+src/services/
+├── index.ts           # ❌ 无法表达服务职责
+├── api.ts             # ❌ 过于宽泛
+└── client.ts          # ❌ 技术术语，缺乏业务含义
+```
+
+## 特殊情况处理
+
+### 🎯 允许 index 文件的场景
+
+#### 1. UI 组件导出
+
+```typescript
+// ✅ components/user-card/index.tsx
+import UserCard from "./UserCard";
+export default UserCard;
+```
+
+#### 2. 视图组件入口
+
+```typescript
+// ✅ views/main/index.tsx
+import Main from "./Main";
+export default Main;
+```
+
+### 🚫 严格禁止的场景
+
+#### 1. 业务逻辑混合导出
+
+```typescript
+// ❌ 禁止：utils/index.ts
+export * from "./validation";
+export * from "./format";
+export * from "./currency";
+// 问题：无法明确文件职责，增加维护成本
+```
+
+#### 2. 类型定义混合导出
+
+```typescript
+// ❌ 禁止：types/index.ts
+export * from "./user";
+export * from "./order";
+export * from "./payment";
+// 问题：类型来源不明确，调试困难
+```
+
+## 重构指南
+
+### 从 index 文件迁移
+
+#### 步骤 1：分析内容分组
+
+```typescript
+// 原文件：constants/index.ts
+export const USER_STATUS = { ACTIVE: "active", INACTIVE: "inactive" };
+export const FORM_RULES = { MAX_LENGTH: 50, MIN_LENGTH: 8 };
+export const API_ENDPOINTS = { user: "/api/user", order: "/api/order" };
+```
+
+#### 步骤 2：按业务领域拆分
+
+```typescript
+// 新文件：constants/user.ts
+export const USER_STATUS = {
+  active: "active",
+  inactive: "inactive",
+};
+
+// 新文件：constants/form.ts
+export const FORM_RULES = {
+  maxLength: 50,
+  minLength: 8,
+};
+
+// 新文件：constants/api.ts
+export const API_ENDPOINTS = {
+  userProfile: "/api/user",
+  orderList: "/api/order",
+};
+```
+
+#### 步骤 3：更新导入语句
+
+```typescript
+// ✅ 重构后
+import { USER_STATUS } from "../constants/user";
+import { FORM_RULES } from "../constants/form";
+
+// ❌ 重构前
+import { USER_STATUS, FORM_RULES } from "../constants";
+```
+
+## 最佳实践
+
+### ✅ 推荐做法
+
+1. **文件名即文档**：通过文件名就能理解其业务职责
+2. **单一职责**：每个文件只负责一个明确的业务领域
+3. **领域分组优先**：2个以上同领域文件使用目录分组，避免命名前缀
+4. **避免缩写**：使用完整的业务术语，避免模糊缩写
+5. **复数/单数规范**：严格遵循复数/单数决策流程
+6. **导出优化**：业务逻辑优先用命名导出，组件用 default 导出
+7. **Tree Shaking 友好**：优先使用命名导出支持按需导入
+8. **目录规范**：严格按照目录分类规则组织文件
+9. **重构敏感性**：发现同领域文件增多时及时重构为分组结构
+
+### ❌ 避免做法
+
+1. **技术导向命名**：如 `hooks.ts`、`interfaces.ts`、`enums.ts`
+2. **过度抽象命名**：如 `common.ts`、`shared.ts`、`global.ts`
+3. **命名前缀模式**：多个同领域文件使用前缀而非分组（如 `user-profile.ts` vs `user/profile.ts`）
+4. **混合职责文件**：一个文件包含多个不相关的业务领域
+5. **index 文件滥用**：在业务代码中大量使用 index 文件
+6. **导出方式混乱**：业务逻辑文件使用 default 导出
+7. **复数/单数不一致**：忽视命名语义规范
+8. **目录违规**：在禁止使用 index 的目录中创建 index 文件
+9. **忽视重构时机**：发现同领域文件增多时不及时重构为分组结构

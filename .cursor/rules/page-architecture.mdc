@@ -1,0 +1,1083 @@
+---
+alwaysApply: true
+appliesTo:
+  - "**/pages/**/*.tsx"
+  - "**/pages/**/*.ts"
+  - "**/pages/**/index.tsx"
+  - "**/pages/*/**/index.tsx"
+---
+
+# 页面架构规范
+
+## 规范来源
+
+本规范基于项目 `pages/home` 目录结构制定，采用 **容器-组件模式**（Container-Component Pattern），确保页面逻辑清晰、职责分离、可维护性强。
+
+> 📋 **适用范围**: 本规范支持平铺和领域分组两种页面组织方式，确保项目中所有页面保持一致的架构模式。根据业务复杂度灵活选择合适的组织方式。
+
+## 容器-组件模式详解
+
+### 🎯 核心概念
+
+容器-组件模式（Container-Component Pattern）是一种重要的前端架构设计模式，它将UI组件分为两个不同职责的层次：
+
+#### 容器（Container）
+
+- **职责**：负责业务逻辑、状态管理、数据处理
+- **特点**：包含状态（state）、处理副作用、API调用
+- **位置**：在你的项目中对应 `models/` 目录
+
+#### 组件（Component）
+
+- **职责**：负责UI渲染、用户交互展示
+- **特点**：无状态或少状态、纯展示逻辑
+- **位置**：在你的项目中对应 `views/` 和 `components/` 目录
+
+### 📊 模式架构图
+
+```mermaid
+graph TD
+    A["📱 页面入口<br/>(index.tsx)"] --> B["🏗️ 容器层<br/>(models/)"]
+    A --> C["🎨 组件层<br/>(views/ & components/)"]
+
+    B --> B1["业务逻辑"]
+    B --> B2["状态管理"]
+    B --> B3["API调用"]
+    B --> B4["数据处理"]
+
+    C --> C1["UI渲染"]
+    C --> C2["用户交互"]
+    C --> C3["样式展示"]
+    C --> C4["视图组装"]
+
+    B -.-> C
+
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style C fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style B1 fill:#f1f8e9
+    style B2 fill:#f1f8e9
+    style B3 fill:#f1f8e9
+    style B4 fill:#f1f8e9
+    style C1 fill:#fef7e0
+    style C2 fill:#fef7e0
+    style C3 fill:#fef7e0
+    style C4 fill:#fef7e0
+```
+
+### 🏗️ 项目中的实现方式
+
+#### 1. 容器层（models/）
+
+```typescript
+// models/page.ts - 业务逻辑容器
+import { createContainer } from "unstated-next";
+
+const usePageContainer = () => {
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // 业务逻辑：API调用、数据处理
+  const fetchUserData = async (userId: string) => {
+    setLoading(true);
+    try {
+      const result = await api.getUser(userId);
+      setUser(result);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    state: { user, loading },
+    fetchUserData,
+  };
+};
+
+export const Page = createContainer(usePageContainer);
+```
+
+#### 2. 组件层（views/ & components/）
+
+```typescript
+// views/main/index.tsx - 视图组件
+import { Page } from "../../models/page";
+
+const Main = () => {
+  // 从容器获取状态和方法
+  const { state: { user, loading }, fetchUserData } = Page.useContainer();
+
+  // 只负责UI渲染
+  return (
+    <div>
+      {loading ? <div>Loading...</div> : <div>{user?.name}</div>}
+      <button onClick={() => fetchUserData('123')}>加载用户</button>
+    </div>
+  );
+};
+```
+
+### ✅ 模式优势
+
+#### 1. **职责分离**
+
+- 业务逻辑与UI逻辑完全分离
+- 提高代码可维护性和可测试性
+
+#### 2. **复用性增强**
+
+- 容器可以被多个组件复用
+- 组件可以接受不同的数据源
+
+#### 3. **测试友好**
+
+- 容器测试：专注业务逻辑测试
+- 组件测试：专注UI渲染测试
+
+#### 4. **团队协作**
+
+- 前端工程师可以分工：有人负责逻辑，有人负责UI
+- 减少代码冲突
+
+### 🔄 与传统模式对比
+
+| 特性       | 传统模式          | 容器-组件模式      |
+| ---------- | ----------------- | ------------------ |
+| 数据流     | Props层层传递     | 容器直接消费       |
+| 逻辑分布   | 散落在各组件      | 集中在容器层       |
+| 测试复杂度 | 需要mock大量props | 容器和组件独立测试 |
+| 代码维护   | 修改影响多个文件  | 修改集中在容器     |
+
+### 🎯 页面级别的实现示例
+
+#### 页面入口（组装容器和组件）
+
+```typescript
+// 📁 pages/home/index.tsx - 页面入口，组装容器和组件
+import { Page } from "./models/page";
+import Main from "./views/main";
+
+const Home = () => {
+  return (
+    <Page.Provider>  {/* 容器提供器 */}
+      <Main />       {/* 主要组件 */}
+    </Page.Provider>
+  );
+};
+```
+
+#### 组件内部的数据消费
+
+```typescript
+// 📁 components/user-card/index.tsx
+import { Page } from "../../models/page";
+
+const UserCard = ({ size = 'medium' }) => {
+  // 直接从容器消费数据，避免props传递
+  const { state: { user } } = Page.useContainer();
+
+  return (
+    <div className={`card ${size}`}>
+      <img src={user?.avatar} />
+      <span>{user?.name}</span>
+    </div>
+  );
+};
+```
+
+### 🎨 实际应用场景
+
+1. **表单页面**：表单逻辑在容器，UI组件只负责渲染
+2. **列表页面**：数据获取、筛选、分页逻辑在容器
+3. **仪表板**：业务数据处理在容器，图表组件纯展示
+4. **用户管理**：用户状态管理在容器，各UI模块消费数据
+
+## 命名约定
+
+### 🎯 命名体系概览
+
+页面架构的命名涉及多个层面，需要保持一致性和语义清晰：
+
+#### 📁 文件和目录命名
+
+- **领域目录**: `kebab-case` (如: `hotel`)
+- **页面目录**: `kebab-case` (如: `facility`, `info`, `booking`)
+- **组件文件**: `index.tsx` + `index.module.scss` (仅限 views 和 components 目录)
+- **业务文件**: 业务强相关命名，禁止使用 `index.ts/tsx` (适用于 constants、types、utils、models 等)
+- **参考**: 详见《文件组织规范》和《代码标识符命名规范》
+
+#### 🏗️ 路径命名约定
+
+##### ✅ 推荐的路径结构
+
+```
+pages/hotel/facility/          # hotel业务 + facility功能
+pages/hotel/info/              # hotel业务 + info功能
+pages/hotel/booking/           # hotel业务 + booking功能
+```
+
+##### ❌ 避免的路径结构
+
+```
+pages/hotel-facility/          # ❌ 应该拆分为 hotel/facility
+pages/hotelInfo/               # ❌ 应该用 kebab-case: hotel/info
+pages/HotelBooking/            # ❌ 应该用 kebab-case: hotel/booking
+```
+
+#### ⚛️ 组件命名
+
+- **页面组件**: `PascalCase` 命名 (如: `HotelFacility`, `Home`)
+- **视图组件**: 功能描述 (如: `Main`, `Header`, `List`)
+- **原子组件**: 功能描述 (如: `Card`, `Table`, `Modal`)
+
+### 🔑 领域内命名去冗余原则
+
+**规则**：当文件已位于特定领域目录内时，禁止在子文件和目录中重复使用领域前缀。
+
+```typescript
+// ✅ 强制：去除冗余，语义精确
+pages/hotel/facility/
+├── components/
+│   └── card/                   // 简洁明确
+├── views/
+│   └── list/                   // 功能直观
+├── constants/
+│   └── display.ts              // 语义明确
+└── utils/
+    └── format.ts               // 职责明确
+
+// ❌ 禁止：领域内命名冗余
+pages/hotel/facility/
+├── components/
+│   └── facility-card/          // 违规：facility 前缀冗余
+├── views/
+│   └── facility-list/          // 违规：facility 前缀冗余
+├── constants/
+│   └── facility.ts             // 违规：模糊命名
+└── utils/
+    └── facility.ts             // 违规：模糊命名
+```
+
+## 目录结构规范
+
+### 标准页面目录结构
+
+#### 🏗️ 支持层级化页面组织
+
+页面目录支持**平铺结构**和**领域分组结构**两种组织方式：
+
+##### 1. 平铺结构（简单页面）
+
+```
+pages/
+├── home/                      # 首页
+│   ├── index.tsx
+│   ├── components/
+│   ├── views/
+│   └── models/
+└── about/                     # 关于页面
+    ├── index.tsx
+    ├── components/
+    ├── views/
+    └── models/
+```
+
+##### 2. 领域分组结构（推荐用于复杂业务）
+
+```
+pages/
+├── hotel/                     # 酒店业务领域
+│   ├── facility/              # 酒店设施页面
+│   │   ├── index.tsx          # 页面入口文件
+│   │   ├── components/        # 页面原子组件
+│   │   │   ├── card/
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── index.module.scss
+│   │   │   └── filter-panel/
+│   │   │       ├── index.tsx
+│   │   │       └── index.module.scss
+│   │   ├── constants/         # 模块常量和枚举
+│   │   │   ├── facility.ts
+│   │   │   └── filter.ts
+│   │   ├── models/            # 业务逻辑和状态管理
+│   │   │   ├── page.ts        # 主逻辑容器
+│   │   │   └── filter.ts      # 筛选逻辑容器(可选)
+│   │   ├── types/             # 页面类型定义(可选)
+│   │   │   ├── facility.ts
+│   │   │   └── filter.ts
+│   │   ├── utils/             # 页面专用工具方法
+│   │   │   ├── validation.ts
+│   │   │   └── format.ts
+│   │   └── views/             # 视图组件
+│   │       ├── main/          # 主视图(组装其他视图)
+│   │       │   ├── index.tsx
+│   │       │   └── index.module.scss
+│   │       └── list/          # 设施列表视图
+│   │           ├── index.tsx
+│   │           └── index.module.scss
+│   ├── info/                  # 酒店信息页面
+│   │   ├── index.tsx
+│   │   ├── components/
+│   │   ├── views/
+│   │   ├── models/
+│   │   └── utils/
+│   └── booking/               # 酒店预订页面
+│       ├── index.tsx
+│       ├── components/
+│       ├── views/
+│       ├── models/
+│       └── utils/
+
+```
+
+## 页面组织原则
+
+### 🎯 领域分组决策
+
+#### 何时使用领域分组？
+
+- **复杂业务系统**：当某个业务领域有多个相关页面时
+- **团队协作**：不同团队负责不同业务领域时
+- **功能内聚**：相关功能页面需要共享组件、工具等时
+
+#### 何时使用平铺结构？
+
+- **简单应用**：页面数量较少，业务逻辑简单
+- **独立页面**：页面之间关联性较弱
+- **快速原型**：项目初期或演示项目
+
+#### 领域分组示例
+
+```typescript
+// ✅ 酒店业务领域 - 功能内聚
+pages/hotel/
+├── facility/     # 设施管理
+├── info/         # 基础信息
+├── booking/      # 预订管理
+└── reviews/      # 评价管理
+```
+
+### 🎯 页面组织决策流程图
+
+```mermaid
+graph TD
+    A["🏗️ 页面组织决策"] --> B{"业务复杂度评估"}
+
+    B -->|简单应用<br/>页面较少| C["📄 平铺结构"]
+    B -->|复杂业务<br/>多个相关页面| D["🏢 领域分组结构"]
+
+    C --> C1["pages/home/<br/>├── index.tsx<br/>├── components/<br/>├── views/<br/>└── models/"]
+    C --> C2["pages/about/<br/>├── index.tsx<br/>├── components/<br/>├── views/<br/>└── models/"]
+
+        D --> D1["🏨 Hotel 领域"]
+
+        D1 --> D1A["pages/hotel/facility/<br/>酒店设施页面"]
+    D1 --> D1B["pages/hotel/info/<br/>酒店信息页面"]
+    D1 --> D1C["pages/hotel/booking/<br/>预订管理页面"]
+
+    D1A --> E["📁 标准页面结构<br/>├── index.tsx (入口)<br/>├── components/ (原子组件)<br/>├── constants/ (常量)<br/>├── models/ (业务逻辑)<br/>├── types/ (类型定义)<br/>├── utils/ (工具方法)<br/>└── views/ (视图组件)"]
+    D1B --> E
+    D1C --> E
+
+    style A fill:#e1f5fe
+    style B fill:#fff3e0
+    style C fill:#e8f5e8
+    style D fill:#f3e5f5
+    style E fill:#fce4ec
+
+    classDef domainBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef pageBox fill:#f9fbe7,stroke:#689f38,stroke-width:1px
+
+    class D1 domainBox
+    class D1A,D1B,D1C,C1,C2 pageBox
+```
+
+### 🔗 跨领域共享组件
+
+当多个领域需要共享组件时，应提升到更高层级：
+
+```
+src/
+├── components/              # 全局共享组件
+│   ├── ui/                 # 基础UI组件
+│   │   ├── button/
+│   │   ├── input/
+│   │   └── modal/
+│   └── business/           # 业务共享组件
+│       ├── user-avatar/
+│       ├── date-picker/
+│       └── address-form/
+└── pages/
+    └── hotel/
+        ├── facility/       # 使用全局组件
+        ├── info/           # 使用全局组件
+        └── booking/        # 使用全局组件
+```
+
+## 核心架构原则
+
+### 1. 容器-组件分离
+
+```typescript
+// ✅ 正确：逻辑在 models，视图在 views
+// models/page.ts
+import { createContainer } from "unstated-next";
+
+const useContainer = () => {
+  const [data, setData] = useState();
+  const handleAction = () => { /* 业务逻辑 */ };
+
+  return {
+    state: { data },
+    handleAction,
+  };
+};
+
+export const Page = createContainer(useContainer);
+
+// views/main/index.tsx
+import { Page } from "../../models/page";
+
+const Main = () => {
+  const { state: { data }, handleAction } = Page.useContainer();
+  return <div onClick={handleAction}>{data}</div>;
+};
+```
+
+### 2. 页面入口模式
+
+```typescript
+// ✅ 页面入口文件标准格式
+// index.tsx
+import { Page } from "./models/page";
+import Main from "./views/main";
+
+const PageName = () => {
+  return (
+    <Page.Provider>
+      <Main />
+    </Page.Provider>
+  );
+};
+
+export default PageName;
+```
+
+### 3. 领域内命名去冗余原则
+
+**规则**：当文件已位于特定领域目录内时，禁止在子文件和目录中重复使用领域前缀。
+
+```typescript
+// ✅ 强制：去除冗余，语义精确
+pages/hotel/facility/
+├── components/
+│   └── card/                   // 简洁明确
+├── views/
+│   └── list/                   // 功能直观
+├── constants/
+│   └── display.ts              // 语义明确
+└── utils/
+    └── format.ts               // 职责明确
+
+// ❌ 禁止：领域内命名冗余
+pages/hotel/facility/
+├── components/
+│   └── facility-card/          // 违规：facility 前缀冗余
+├── views/
+│   └── facility-list/          // 违规：facility 前缀冗余
+├── constants/
+│   └── facility.ts             // 违规：模糊命名
+└── utils/
+    └── facility.ts             // 违规：模糊命名
+```
+
+## 目录职责定义
+
+### 📁 index.tsx
+
+- **职责**: 页面入口文件，负责状态容器的提供和主视图的渲染
+- **原则**:
+  - 只包含 Provider 的组装和主视图的引入
+  - 不包含具体业务逻辑
+  - 使用页面名称作为组件名
+
+```typescript
+// ✅ 标准格式
+import { Page } from "./models/page";
+import Main from "./views/main";
+
+const Home = () => {
+  return (
+    <Page.Provider>
+      <Main />
+    </Page.Provider>
+  );
+};
+
+export default Home;
+```
+
+### 📁 models/
+
+- **职责**: 页面所有业务逻辑和状态管理
+- **原则**:
+  - 使用 `unstated-next` 创建状态容器
+  - `page.ts` 是主逻辑容器，包含页面核心逻辑
+  - 根据页面复杂度拆分其他逻辑容器（如 `form.ts`）
+  - 包含所有业务逻辑、数据处理、API 调用
+  - 每个文件负责一个业务领域
+  - **导出结构规范**: 变量/状态放在 `state` 对象中，方法放在外层
+  - **排序规范**: 所有导出内容按单词长度从小到大排序，长度相同时按字母顺序排序
+
+```typescript
+// ✅ models/page.ts - 主逻辑容器
+import { createContainer } from "unstated-next";
+import { UserFormData } from "../types";
+
+const usePageContainer = () => {
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<UserFormData | null>(null);
+  const [currentView, setCurrentView] = useState<"list" | "form">("list");
+
+  const fetchUserData = async (userId: string) => {
+    setLoading(true);
+    try {
+      const result = await api.getUser(userId);
+      setUser(result);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateUser = async (userData: UserFormData) => {
+    setLoading(true);
+    try {
+      const result = await api.updateUser(userData);
+      setUser(result);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchView = (view: "list" | "form") => {
+    setCurrentView(view);
+  };
+
+  return {
+    state: {
+      user,
+      loading,
+      currentView,
+    },
+    switchView,
+    updateUser,
+    fetchUserData,
+  };
+};
+
+export const Page = createContainer(usePageContainer);
+```
+
+```typescript
+// ✅ models/form.ts - 表单逻辑容器（可选）
+import { createContainer } from "unstated-next";
+import { UserFormData } from "../types";
+import { validateUserForm } from "../utils/validation";
+
+const useFormContainer = () => {
+  const [formData, setFormData] = useState<UserFormData>({
+    name: "",
+    email: "",
+    age: 0,
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const updateField = (field: keyof UserFormData, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // 清除当前字段的错误
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const result = validateUserForm(formData);
+    setErrors(result.errors);
+    return result.isValid;
+  };
+
+  const resetForm = () => {
+    setFormData({ name: "", email: "", age: 0 });
+    setErrors({});
+  };
+
+  return {
+    state: {
+      errors,
+      formData,
+    },
+    resetForm,
+    updateField,
+    validateForm,
+  };
+};
+
+export const Form = createContainer(useFormContainer);
+```
+
+#### 导出排序示例
+
+```typescript
+// ✅ 完整的按长度排序示例
+const useExampleContainer = () => {
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+
+  const save = () => {};
+  const validateForm = () => {};
+
+  return {
+    state: {
+      name,
+      loading,
+      isActive,
+    },
+    save,
+    validateForm,
+  };
+};
+```
+
+### 📊 导出排序规则图
+
+```mermaid
+graph LR
+    A["导出结构"] --> B["state 对象"]
+    A --> C["方法"]
+
+    B --> B1["变量按长度排序"]
+    B --> B2["长度相同按字母排序"]
+
+    C --> C1["方法按长度排序"]
+    C --> C2["长度相同按字母排序"]
+
+    B1 --> D["name<br/>loading<br/>isActive"]
+    C1 --> E["save<br/>validateForm"]
+
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style D fill:#fce4ec
+    style E fill:#f3e5f5
+```
+
+### 📁 views/
+
+- **职责**: 页面视图组件，按功能区块划分
+- **原则**:
+  - 只负责 UI 展示，不包含业务逻辑
+  - 通过 `useContainer()` 获取状态和方法
+  - `main/` 作为主视图，组装其他视图组件
+  - 其他视图按页面功能划分（Header、Footer、业务区块等）
+
+```typescript
+// ✅ views/main/index.tsx - 主视图，组装其他视图
+import { Page } from "../../models/page";
+import List from "../list";
+import Form from "../form";
+import styles from "./index.module.scss";
+
+const Main = () => {
+  const { state: { loading, currentView }, switchView } = Page.useContainer();
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <div className={styles.container}>
+      {currentView === 'list' && <List />}
+      {currentView === 'form' && <Form />}
+    </div>
+  );
+};
+
+export default Main;
+```
+
+### 📁 components/
+
+- **职责**: 页面原子组件，提供给 views 使用
+- **原则**:
+  - 当前页面专用的原子级可复用组件
+  - 被 views 中的组件引用和使用
+  - **直接消费 models 下的数据**，避免 props 层层传递
+  - **props 用于配置型属性**（如 size、variant、disabled），业务逻辑数据直接消费 models
+  - **单次使用的组件无需 props**，配置直接硬编码；多次使用才需要 props 处理差异
+  - 通过 `useContainer()` 获取所需的状态和方法
+  - 专注于单一功能，保持组件的原子性
+
+```typescript
+// ✅ components/user-avatar/index.tsx - 多次使用的组件，需要 props 处理配置差异
+import { Page } from "../../models/page";
+import styles from "./index.module.scss";
+
+interface UserAvatarProps {
+  size?: 'small' | 'medium' | 'large';
+}
+
+const UserAvatar = ({ size = 'medium' }: UserAvatarProps) => {
+  const { state: { user } } = Page.useContainer();
+
+  return (
+    <img
+      className={`${styles.avatar} ${styles[size]}`}
+      src={user?.avatar}
+      alt={user?.name}
+    />
+  );
+};
+
+export default UserAvatar;
+```
+
+```typescript
+// ✅ components/edit-button/index.tsx - 专用的编辑按钮组件
+import { Page } from "../../models/page";
+import styles from "./index.module.scss";
+
+interface EditButtonProps {
+  variant?: 'primary' | 'secondary';
+}
+
+const EditButton = ({ variant = 'primary' }: EditButtonProps) => {
+  const { state: { loading }, updateUser } = Page.useContainer();
+
+  return (
+    <button
+      className={`${styles.button} ${styles[variant]}`}
+      onClick={updateUser}
+      disabled={loading}
+    >
+      编辑资料
+    </button>
+  );
+};
+
+export default EditButton;
+```
+
+```typescript
+// ✅ components/save-button/index.tsx - 单次使用的组件，无需 props
+import { Page } from "../../models/page";
+import styles from "./index.module.scss";
+
+const SaveButton = () => {
+  const { state: { loading }, saveData } = Page.useContainer();
+
+  return (
+    <button
+      className={styles.saveButton}
+      onClick={saveData}
+      disabled={loading}
+    >
+      {loading ? '保存中...' : '保存'}
+    </button>
+  );
+};
+
+export default SaveButton;
+```
+
+### 📁 constants/
+
+- **职责**: 页面模块常量和枚举定义
+- **原则**:
+  - 存储页面专用的常量和枚举
+  - 避免硬编码，提高代码可维护性
+  - **常量统一使用 UPPER_SNAKE_CASE 命名**
+  - 枚举使用 `PascalCase` 命名
+  - 文件名必须业务强相关，避免模糊命名如 `enums.ts`
+
+```typescript
+// ✅ constants/form.ts - 表单相关常量和枚举
+export const FORM_CONFIG = {
+  maxNameLength: 50,
+  minAge: 18,
+  defaultCountry: "CN",
+};
+
+export const VALIDATION_MESSAGES = {
+  requiredField: "此字段为必填项",
+  invalidEmail: "邮箱格式不正确",
+  passwordTooShort: "密码长度至少8位",
+};
+
+export enum FormStep {
+  BasicInfo = 1,
+  ContactInfo = 2,
+  Preferences = 3,
+  Confirmation = 4,
+}
+```
+
+```typescript
+// ✅ constants/facility.ts - 设施相关常量和枚举
+export enum FacilityType {
+  Pool = "pool",
+  Gym = "gym",
+  Spa = "spa",
+  Restaurant = "restaurant",
+}
+
+export const FACILITY_CONFIG = {
+  maxDisplayCount: 20,
+  defaultFilterType: "all",
+  imageMaxSize: 5 * 1024 * 1024, // 5MB
+};
+```
+
+### 📁 utils/
+
+- **职责**: 页面专用工具方法
+- **原则**:
+  - 纯函数，无副作用
+  - 只在当前页面中使用的工具方法
+  - 函数命名使用动词开头
+  - 按功能模块分文件组织
+  - **禁止使用 `index.ts`**，必须使用业务强相关的文件名
+
+```typescript
+// ✅ utils/format.ts - 格式化工具
+export const formatUserDisplayName = (user: UserType): string => {
+  return `${user.firstName} ${user.lastName}`;
+};
+
+export const formatStepProgress = (currentStep: number, totalSteps: number): string => {
+  return `${currentStep}/${totalSteps}`;
+};
+```
+
+```typescript
+// ✅ utils/validation.ts - 页面专用验证工具
+import { VALIDATION_MESSAGES } from "../constants/form";
+
+export const validateUserForm = (formData: UserFormData): ValidationResult => {
+  const errors: ValidationErrors = {};
+
+  if (!formData.name.trim()) {
+    errors.name = VALIDATION_MESSAGES.requiredField;
+  }
+
+  if (!isValidEmail(formData.email)) {
+    errors.email = VALIDATION_MESSAGES.invalidEmail;
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+};
+
+const isValidEmail = (email: string): boolean => {
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return EMAIL_REGEX.test(email);
+};
+```
+
+### 📁 types/ (可选)
+
+- **职责**: 页面专用类型定义
+- **原则**:
+  - 定义页面内使用的 TypeScript 类型
+  - 复杂页面建议创建，简单页面可省略
+  - 按业务模块分文件组织
+  - **禁止使用 `index.ts`**，必须使用业务强相关的文件名
+
+```typescript
+// ✅ types/form.ts - 表单相关类型
+export interface UserFormData {
+  name: string;
+  email: string;
+  age: number;
+  status: UserStatus;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ValidationErrors;
+}
+
+export type ValidationErrors = Record<string, string>;
+```
+
+```typescript
+// ✅ types/step.ts - 步骤相关类型
+export interface StepData {
+  id: number;
+  title: string;
+  isCompleted: boolean;
+  isActive: boolean;
+}
+
+export interface StepNavigation {
+  canGoNext: boolean;
+  canGoPrev: boolean;
+  nextStep: () => void;
+  prevStep: () => void;
+}
+```
+
+## 最佳实践
+
+### ✅ 推荐做法
+
+1. **状态提升**: 将所有状态管理统一在 `models/` 中
+2. **职责单一**: 每个文件只负责一个功能领域
+3. **原子组件**: `components/` 提供原子级可复用组件
+4. **视图组装**: `views/main` 组装其他视图组件
+5. **逻辑拆分**: 复杂页面按业务领域拆分 models
+6. **类型安全**: 复杂页面创建 `types/` 目录定义类型
+7. **样式隔离**: 使用 SCSS Modules 避免样式冲突
+8. **避免硬编码**: 使用 `constants/` 管理常量和枚举
+9. **组件数据消费**: `components/` 直接消费 `models/` 数据，props 仅在多次使用时用于配置差异
+10. **文件命名规范**: 严格遵循《文件组织规范》，业务文件禁用 `index.ts/tsx`
+
+### ❌ 避免做法
+
+1. **通过 props 传递业务数据给 components**
+
+```typescript
+// ❌ 错误：通过 props 传递业务数据
+// views/info/index.tsx
+const Info = () => {
+  const { state: { user, loading } } = Page.useContainer();
+
+  return (
+    <div>
+      <Avatar src={user.avatar} alt={user.name} size="large" />
+      <ActionButton
+        text="编辑资料"
+        loading={loading}
+        onClick={() => updateUser()}
+      />
+    </div>
+  );
+};
+
+// ❌ 错误：components 接收业务逻辑相关的 props
+// components/action-button/index.tsx
+const ActionButton = ({ text, loading, onClick }: ActionButtonProps) => {
+  return (
+    <button onClick={onClick} disabled={loading}>
+      {text}
+    </button>
+  );
+};
+```
+
+2. **单次使用的组件不必要地使用 props**
+
+```typescript
+// ✅ 正确：单次使用的组件直接硬编码配置
+const ConfirmDialog = () => {
+  const { state: { visible }, hideDialog, confirmAction } = Page.useContainer();
+
+  return (
+    <dialog open={visible}>
+      <h3>确认删除</h3>
+      <p>删除后无法恢复，确定要删除吗？</p>
+      <button onClick={confirmAction}>确认删除</button>
+    </dialog>
+  );
+};
+
+// ❌ 错误：单次使用的组件使用了不必要的 props
+// components/confirm-dialog/index.tsx
+interface ConfirmDialogProps {
+  title: string;
+  message: string;
+  confirmText: string;
+}
+
+const ConfirmDialog = ({ title, message, confirmText }: ConfirmDialogProps) => {
+  const { state: { visible }, hideDialog, confirmAction } = Page.useContainer();
+
+  return (
+    <dialog open={visible}>
+      <h3>{title}</h3>
+      <p>{message}</p>
+      <button onClick={confirmAction}>{confirmText}</button>
+    </dialog>
+  );
+};
+```
+
+3. **在视图中写业务逻辑**
+
+```typescript
+// ❌ 错误：在视图中直接处理业务逻辑
+const Main = () => {
+  const [data, setData] = useState();
+
+  const handleSubmit = async () => {
+    // 业务逻辑应该在 models 中
+    const result = await api.submit();
+    setData(result);
+  };
+
+  return <form onSubmit={handleSubmit}>...</form>;
+};
+```
+
+4. **models 导出结构不规范**
+
+```typescript
+// ✅ 正确：变量放在 state 中，方法放在外层
+const usePageContainer = () => {
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const fetchUserData = async () => {
+    /* ... */
+  };
+
+  return {
+    state: { user, loading },
+    fetchUserData,
+  };
+};
+
+// ❌ 错误：变量和方法混在一起导出
+const usePageContainer = () => {
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const fetchUserData = async () => {
+    /* ... */
+  };
+
+  // 错误：没有按要求结构化导出，变量和方法混在一起
+  return {
+    user,
+    loading,
+    fetchUserData,
+  };
+};
+```
+
+5. **直接在页面入口写复杂逻辑**
+
+```typescript
+// ❌ 错误：页面入口包含复杂逻辑
+const HomePage = () => {
+  const [state, setState] = useState();
+
+  useEffect(() => {
+    // 复杂逻辑应该在 models 中
+    fetchComplexData();
+  }, []);
+
+  return <div>...</div>;
+};
+```

@@ -11,12 +11,12 @@
     // "disableReferencedProjectLoad": true,
 
     /* Language and Environment */
-    "target": "esnext",
+    "target": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    // "jsx": "preserve",
+    "jsx": "react-jsx" /* React(17+) 的 JSX 转换。无需导入 React | 更小的 Bundle 体积 */,
     // "libReplacement": true,
-    // "experimentalDecorators": true,
-    // "emitDecoratorMetadata": true,
+    "experimentalDecorators": true /* 启用实验性装饰器 */,
+    "emitDecoratorMetadata": true /* 启用装饰器元数据 */,
     // "jsxFactory": "",
     // "jsxFragmentFactory": "",
     // "jsxImportSource": "",
@@ -28,9 +28,12 @@
     /* Modules */
     "module": "ESNext",
     "rootDir": "./src",
-    "moduleResolution": "bundler",
-    "baseUrl": "./",
-    // "paths": {},
+    "moduleResolution": "bundler" /* 模块解析规则，适用现代打包工具。支持无扩展名导入 | 支持多种解析路径（路径映射、绝对路径、静态资源） */,
+    "baseUrl": "./" /* 非相对路径 -> 导入模块的查找起始位置 */,
+    "paths": {
+      "@/*": ["src/*"],
+      "~/*": ["./"] /* 项目根目录别名 */
+    },
     // "rootDirs": [],
     // "typeRoots": [],
     // "types": [],
@@ -42,7 +45,7 @@
     // "resolvePackageJsonImports": true,
     // "customConditions": [],
     // "noUncheckedSideEffectImports": true,
-    // "resolveJsonModule": true,
+    "resolveJsonModule": true /* 允许导入 JSON 模块 */,
     // "allowArbitraryExtensions": true,
     // "noResolve": true,
 
@@ -74,12 +77,12 @@
     // "declarationDir": "./",
 
     /* Interop Constraints */
-    // "isolatedModules": true,
+    "isolatedModules": true /* 启用模块隔离，确保每个模块都是独立的 */,
     // "verbatimModuleSyntax": true,
     // "isolatedDeclarations": true,
     // "erasableSyntaxOnly": true,
-    // "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true /* ES6模块化 和 CommonJS 互相操作 */,
+    "allowSyntheticDefaultImports": true /* 编译时类型支持，允许从<没有设置默认导出的模块>中导入默认导出 */,
+    "esModuleInterop": true /* 运行时，ES6模块化 和 CommonJS 互相操作 */,
     // "preserveSymlinks": true,
     "forceConsistentCasingInFileNames": true /* 强制文件名大小写一致。import './Components' 和 import './components' 视为不同 */,
 
@@ -96,10 +99,10 @@
     // "alwaysStrict": true,
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
-    // "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": true /* 启用可选属性类型检查 */,
     // "noImplicitReturns": true,
     // "noFallthroughCasesInSwitch": true,
-    // "noUncheckedIndexedAccess": true,
+    "noUncheckedIndexedAccess": true /* 启用索引访问类型检查 */,
     // "noImplicitOverride": true,
     // "noPropertyAccessFromIndexSignature": true,
     // "allowUnusedLabels": true,

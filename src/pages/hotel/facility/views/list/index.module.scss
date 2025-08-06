@@ -1,0 +1,43 @@
+// 设施列表视图组件样式
+.results {
+  margin-top: 24px;
+}
+
+.resultHeader {
+  margin-bottom: 16px;
+}
+
+.count {
+  font-size: 16px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.facilityList {
+  display: grid;
+  gap: 24px;
+
+  &.grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+
+  &.list {
+    grid-template-columns: 1fr;
+
+    // 为列表视图中的卡片提供特殊样式，这里使用 :global 来覆盖子组件样式
+    :global(.facilityCard) {
+      display: flex;
+      height: 200px;
+
+      :global(.cardImage) {
+        width: 300px;
+        flex-shrink: 0;
+      }
+
+      :global(.cardContent) {
+        flex: 1;
+        padding: 20px;
+      }
+    }
+  }
+}

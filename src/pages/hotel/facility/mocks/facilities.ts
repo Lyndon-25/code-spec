@@ -1,0 +1,103 @@
+// 酒店设施模拟数据 - 用于开发和测试
+
+import type { HotelFacility } from "../types/entities";
+import { FacilityCategory } from "../types/entities";
+
+export const generateMockFacilities = (): HotelFacility[] => [
+  {
+    id: "pool-001",
+    name: "室外游泳池",
+    description: "50米标准游泳池，配备救生员和躺椅，营业时间为6:00-22:00",
+    category: FacilityCategory.Recreation,
+    isAvailable: true,
+    hasAdditionalFee: false,
+    images: ["https://picsum.photos/400/300?random=1"],
+    features: ["救生员", "躺椅", "遮阳伞", "毛巾服务"],
+    location: { type: "outdoor", area: "主楼后花园" },
+    operatingHours: {
+      isOpen24Hours: false,
+      schedule: {
+        monday: { isOpen: true, openTime: "06:00", closeTime: "22:00" },
+        tuesday: { isOpen: true, openTime: "06:00", closeTime: "22:00" },
+        wednesday: { isOpen: true, openTime: "06:00", closeTime: "22:00" },
+        thursday: { isOpen: true, openTime: "06:00", closeTime: "22:00" },
+        friday: { isOpen: true, openTime: "06:00", closeTime: "22:00" },
+        saturday: { isOpen: true, openTime: "06:00", closeTime: "22:00" },
+        sunday: { isOpen: true, openTime: "06:00", closeTime: "22:00" },
+      },
+    },
+    capacity: 80,
+  },
+  {
+    id: "gym-001",
+    name: "24小时健身房",
+    description: "现代化健身设施，包含有氧和力量训练器械，24小时开放",
+    category: FacilityCategory.Recreation,
+    isAvailable: true,
+    hasAdditionalFee: false,
+    images: ["https://picsum.photos/400/300?random=2"],
+    features: ["跑步机", "哑铃", "瑜伽垫", "私人教练"],
+    location: { type: "indoor", floor: 2, room: "201-205" },
+    operatingHours: { isOpen24Hours: true },
+    capacity: 30,
+  },
+  {
+    id: "spa-001",
+    name: "水疗中心",
+    description: "专业SPA服务，提供按摩、桑拿、蒸汽浴等放松服务",
+    category: FacilityCategory.Wellness,
+    isAvailable: true,
+    hasAdditionalFee: true,
+    priceInfo: {
+      amount: 299,
+      currency: "CNY",
+      unit: "perPerson",
+      description: "90分钟全身按摩套餐",
+    },
+    images: ["https://picsum.photos/400/300?random=3"],
+    features: ["全身按摩", "面部护理", "桑拿房", "蒸汽浴"],
+    location: { type: "indoor", floor: 3, room: "SPA中心" },
+    operatingHours: {
+      isOpen24Hours: false,
+      schedule: {
+        monday: { isOpen: true, openTime: "10:00", closeTime: "22:00" },
+        tuesday: { isOpen: true, openTime: "10:00", closeTime: "22:00" },
+        wednesday: { isOpen: true, openTime: "10:00", closeTime: "22:00" },
+        thursday: { isOpen: true, openTime: "10:00", closeTime: "22:00" },
+        friday: { isOpen: true, openTime: "10:00", closeTime: "22:00" },
+        saturday: { isOpen: true, openTime: "10:00", closeTime: "22:00" },
+        sunday: { isOpen: true, openTime: "10:00", closeTime: "22:00" },
+      },
+    },
+  },
+  {
+    id: "restaurant-001",
+    name: "景观餐厅",
+    description: "提供国际化美食，拥有绝佳的城市景观视野",
+    category: FacilityCategory.Dining,
+    isAvailable: true,
+    hasAdditionalFee: true,
+    priceInfo: {
+      amount: 150,
+      currency: "CNY",
+      unit: "perPerson",
+      description: "午餐套餐平均消费",
+    },
+    images: ["https://picsum.photos/400/300?random=4"],
+    features: ["国际美食", "城市景观", "私人包厢", "儿童座椅"],
+    location: { type: "indoor", floor: 15, room: "景观餐厅" },
+    operatingHours: {
+      isOpen24Hours: false,
+      schedule: {
+        monday: { isOpen: true, openTime: "07:00", closeTime: "23:00" },
+        tuesday: { isOpen: true, openTime: "07:00", closeTime: "23:00" },
+        wednesday: { isOpen: true, openTime: "07:00", closeTime: "23:00" },
+        thursday: { isOpen: true, openTime: "07:00", closeTime: "23:00" },
+        friday: { isOpen: true, openTime: "07:00", closeTime: "23:00" },
+        saturday: { isOpen: true, openTime: "07:00", closeTime: "23:00" },
+        sunday: { isOpen: true, openTime: "07:00", closeTime: "23:00" },
+      },
+    },
+    capacity: 120,
+  },
+];

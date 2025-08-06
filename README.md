@@ -5,9 +5,17 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8+-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-一个现代化的 TypeScript 代码规范模板，集成了完整的开发工具链和最佳实践配置。旨在为团队提供开箱即用、规范化的项目开发环境。
+企业级前端编码规范库，提供**文件组织**、**页面架构**、**代码命名**、**TypeScript 类型系统**、**配置管理**等完整规范体系。配套丰富的实践示例和自动化工具链，专为 React/TypeScript 项目的标准化开发而设计。
 
 ## ✨ 核心特性
+
+### 📚 编码规范体系
+
+- **📁 文件组织规范** - 语义优先、领域分组、复数/单数命名决策
+- **🏗️ 页面架构规范** - 容器-组件模式、目录职责、React 最佳实践
+- **🏷️ 代码命名规范** - 变量、函数、类、组件的统一命名约定
+- **🔧 TypeScript 规范** - Enum、Interface、联合类型的专业指导
+- **📦 配置管理规范** - Package.json 字段排序、项目类型最佳实践
 
 ### 🛠️ 开发工具链
 
@@ -19,36 +27,44 @@
 - **Commitlint** - 提交信息规范化，遵循 Angular 规范
 - **ls-lint** - 文件/文件夹命名规范自动校验
 
-### 🎯 最佳实践
+### 🎯 项目价值
 
-- **模块化配置** - 各工具配置独立，易于维护
+- **完整规范体系** - 从文件组织到代码编写的全流程标准
+- **丰富实践示例** - 配套完整的示例代码，理论与实践结合
 - **自动化工作流** - 提交前自动检查，保障代码质量
-- **团队协作友好** - 统一的代码规范和提交规范
-- **开箱即用** - 零配置启动，快速上手
+- **团队协作友好** - 统一的编码标准，降低沟通成本
+- **企业级应用** - 适用于大型 React/TypeScript 项目的规范化管理
 
 ## 📁 项目结构
 
 ```
 code-spec/
-├── src/                    # 源码目录
-│   ├── index.ts           # 入口文件
-│   └── utils/             # 工具函数目录
-│       └── index.ts       # 工具函数入口
+├── .cursor/rules/          # 编码规范文档
+│   ├── file-organization.mdc    # 文件组织规范
+│   ├── page-architecture.mdc    # 页面架构规范
+│   ├── code-naming.mdc          # 代码命名规范
+│   ├── typescript.mdc           # TypeScript 编码规范
+│   └── package-json.mdc         # Package.json 字段规范
+├── src/                    # 规范实践示例
+│   ├── components/         # 全局共享组件示例
+│   │   └── ui/            # 基础 UI 组件
+│   ├── constants/         # 常量管理示例
+│   ├── types/             # TypeScript 类型定义示例
+│   ├── utils/             # 工具函数组织示例
+│   │   ├── dates.ts       # 日期专用工具集合
+│   │   ├── formatters.ts  # 通用格式化工具集合
+│   │   └── mocks.ts       # Mock 数据工具
+│   └── pages/             # 页面架构示例
+│       ├── home/          # 简单页面示例
+│       └── hotel/facility/ # 复杂业务页面示例
 ├── .husky/                # Git 钩子配置
-│   ├── pre-commit        # 提交前检查
-│   └── commit-msg        # 提交信息校验
 ├── .vscode/              # VS Code 配置
-│   └── settings.json     # 自动格式化 & 修复等配置
 ├── eslint.config.js      # ESLint 配置（Flat Config）
 ├── prettier.config.js    # Prettier 配置
 ├── .ls-lint.yml         # 文件命名规范配置
 ├── commitlint.config.js  # 提交信息规范配置
 ├── tsconfig.json        # TypeScript 配置
-├── package.json         # 项目配置
-├── pnpm-lock.yaml      # 依赖锁定文件
-├── .gitignore          # Git 忽略文件
-├── LICENSE             # 开源协议
-└── README.md           # 项目说明
+└── package.json         # 项目配置（遵循字段排序规范）
 ```
 
 ## 🚀 快速开始
@@ -105,7 +121,65 @@ pnpm type-check
 pnpm ls-lint
 ```
 
-## 🛠️ 开发规范
+## 📚 编码规范体系
+
+本项目提供了完整的编码规范体系，涵盖从文件组织到代码编写的各个方面：
+
+### 🎯 规范导航
+
+| 规范文件                                                | 适用范围     | 核心内容                     | 快速跳转                                                                                                                                                                                                                |
+| ------------------------------------------------------- | ------------ | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[文件组织规范](.cursor/rules/file-organization.mdc)** | 项目文件结构 | 文件命名、目录结构、导出方式 | [语义优先法则](.cursor/rules/file-organization.mdc#语义优先法则) • [领域分组法则](.cursor/rules/file-organization.mdc#领域分组优于命名前缀法则) • [复数/单数命名](.cursor/rules/file-organization.mdc#复数单数命名规范) |
+| **[页面架构规范](.cursor/rules/page-architecture.mdc)** | 页面级组织   | 容器-组件模式、目录职责      | [容器-组件模式](.cursor/rules/page-architecture.mdc#容器-组件模式详解) • [目录结构](.cursor/rules/page-architecture.mdc#标准页面目录结构)                                                                               |
+| **[代码命名规范](.cursor/rules/code-naming.mdc)**       | 标识符命名   | 变量、函数、类、React组件    | [通用规则](.cursor/rules/code-naming.mdc#通用命名规则) • [布尔值决策](.cursor/rules/code-naming.mdc#布尔值命名决策流程)                                                                                                 |
+| **[TypeScript编码规范](.cursor/rules/typescript.mdc)**  | 类型系统     | Enum、Interface、联合类型    | [Enum命名](.cursor/rules/typescript.mdc#enum-命名规范) • [联合类型](.cursor/rules/typescript.mdc#联合类型命名规范)                                                                                                      |
+| **[Package.json规范](.cursor/rules/package-json.mdc)**  | 项目配置     | 字段排序、项目类型示例       | [字段排序](.cursor/rules/package-json.mdc#标准字段排序-基于业界最佳实践) • [最佳实践](.cursor/rules/package-json.mdc#最佳实践示例)                                                                                      |
+
+### 🔗 规范关系
+
+```mermaid
+graph TD
+    A[文件组织规范] --> B[页面架构规范]
+    A --> C[代码命名规范]
+    A --> D[TypeScript编码规范]
+    A --> E[Package.json规范]
+
+    B --> C
+    B --> D
+    C --> D
+
+    A -.-> F[项目整体结构]
+    B -.-> G[页面级实现]
+    C -.-> H[代码内容规范]
+    D -.-> I[类型系统规范]
+    E -.-> J[配置管理]
+
+    style A fill:#e8f5e8
+    style B fill:#e1f5fe
+    style C fill:#fff3e0
+    style D fill:#f3e5f5
+    style E fill:#fce4ec
+```
+
+### 📖 使用指南
+
+#### 🚀 新项目开始
+
+1. 参考 [文件组织规范] 建立项目结构
+2. 按照 [Package.json规范] 配置项目依赖
+3. 遵循 [代码命名规范] 编写代码
+
+#### 🏗️ 页面开发
+
+1. 按照 [页面架构规范] 组织页面文件
+2. 使用 [TypeScript编码规范] 定义类型
+3. 遵循 [代码命名规范] 命名组件和状态
+
+#### 🔧 团队协作
+
+所有规范互相配合，形成完整的编码标准体系，确保团队代码风格统一、可维护性强。
+
+## 🛠️ 开发工具链
 
 ### 代码风格
 

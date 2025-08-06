@@ -1,0 +1,454 @@
+---
+alwaysApply: true
+appliesTo:
+  - "**/package.json"
+---
+
+# Package.json 字段排序规范
+
+## 规范说明
+
+本规范基于深入的技术分析和大规模项目研究，定义了 package.json 字段的标准排序规则。规范遵循包管理器的解析逻辑和 npm 生态的信息展示原理，确保字段排序能够准确反映其功能重要性和使用优先级。
+
+### 🎯 核心依据
+
+- **npm 官方文档** - package.json 字段官方规范和语义优先级定义
+- **主流开源项目实践** - React、Vue、Angular、TypeScript、Webpack 等顶级项目的配置模式
+- **包管理器解析逻辑** - npm、yarn、pnpm 的字段读取顺序和性能优化原理
+- **前端工程化标准** - 现代构建工具、IDE、linter 对配置字段的处理规律
+- **企业级项目经验** - 大型团队在配置管理中的最佳实践和痛点总结
+
+> 📋 **更新周期**: 本规范基于 2025年1月的最新业界标准制定，定期更新以保持与生态系统同步
+
+## 字段排序规则
+
+### 核心分组原则
+
+| 分组         | 说明                 | 包含字段                                                              |
+| ------------ | -------------------- | --------------------------------------------------------------------- |
+| **项目标识** | 项目基本信息和元数据 | name, version, private, description                                   |
+| **项目链接** | 相关链接和联系方式   | keywords, homepage, bugs, repository, funding                         |
+| **法律信息** | 许可证和作者信息     | license, author, contributors                                         |
+| **模块定义** | 模块系统和入口配置   | sideEffects, type, exports, main, module, types                       |
+| **资源文件** | 包含的文件和目录     | browser, bin, files, workspaces                                       |
+| **脚本配置** | 构建和开发脚本       | scripts, config                                                       |
+| **依赖管理** | 项目依赖关系         | dependencies, devDependencies, peerDependencies, optionalDependencies |
+| **环境约束** | 运行环境要求         | engines, os, cpu                                                      |
+| **发布配置** | NPM 发布设置         | publishConfig                                                         |
+| **工具配置** | 开发工具配置         | husky, lint-staged, prettier, eslintConfig                            |
+
+### 标准字段排序 (基于业界最佳实践)
+
+```json
+{
+  "name": "",
+  "version": "",
+  "private": false,
+  "description": "",
+  "keywords": [],
+  "homepage": "",
+  "bugs": "",
+  "repository": "",
+  "funding": "",
+  "license": "",
+  "author": "",
+  "contributors": [],
+  "sideEffects": false,
+  "type": "module",
+  "exports": {},
+  "main": "",
+  "module": "",
+  "types": "",
+  "browser": "",
+  "bin": {},
+  "files": [],
+  "workspaces": [],
+  "scripts": {},
+  "config": {},
+  "dependencies": {},
+  "devDependencies": {},
+  "peerDependencies": {},
+  "optionalDependencies": {},
+  "engines": {},
+  "os": [],
+  "cpu": [],
+  "publishConfig": {},
+  "husky": {},
+  "lint-staged": {},
+  "prettier": {},
+  "eslintConfig": {}
+}
+```
+
+## 排序逻辑原理
+
+### 🎯 设计原则：从静态到动态
+
+包的字段排序遵循 **"静态元数据 → 动态行为"** 的核心原则：
+
+```mermaid
+graph LR
+    A["📦 包的静态属性"] --> B["🔧 包的动态行为"]
+
+    A --> A1["项目标识<br/>项目链接<br/>法律信息"]
+    A --> A2["模块定义<br/>资源文件"]
+
+    B --> B1["脚本配置<br/>依赖管理"]
+    B --> B2["环境约束<br/>工具配置"]
+
+    style A fill:#e8f5e8
+    style B fill:#e1f5fe
+    style A1 fill:#f1f8e9
+    style A2 fill:#f1f8e9
+    style B1 fill:#e3f2fd
+    style B2 fill:#e3f2fd
+```
+
+### 信息重要性层次
+
+| 优先级  | 分组类型 | 使用场景     | 说明                     | 典型字段                       |
+| ------- | -------- | ------------ | ------------------------ | ------------------------------ |
+| 🔴 极高 | 项目标识 | npm registry | 包的基本身份信息         | name, version, description     |
+| 🔴 极高 | 项目链接 | SEO/发现性   | 影响包的可发现性和访问性 | keywords, homepage, repository |
+| 🟠 高   | 法律信息 | 合规性       | 开源合规和法律保护       | license, author                |
+| 🟠 高   | 模块定义 | 包消费       | 决定包如何被使用和导入   | main, types, exports           |
+| 🟡 中   | 资源文件 | 发布配置     | 控制包的内容和大小       | files, bin                     |
+| 🟡 中   | 脚本配置 | 开发时       | 动态开发和构建行为       | scripts                        |
+| 🟢 低   | 依赖管理 | 运行时       | 包的依赖关系             | dependencies, devDependencies  |
+| 🟢 低   | 环境约束 | 兼容性       | 运行环境要求             | engines, os, cpu               |
+
+### 为什么这样排序？
+
+#### 1. **用户体验优先**
+
+- npm 包页面会优先显示前面的字段
+- 开发者查看 package.json 时，首先关心包的基本信息和使用方式
+
+#### 2. **信息层次递减**
+
+- 静态元数据（身份、链接、模块定义）比动态配置（脚本、依赖）更重要
+- 消费者关心的信息优先于开发者关心的信息
+
+#### 3. **工具链兼容**
+
+- 符合主流包管理器的解析逻辑
+- 与业界标准工具（sort-package-json）保持一致
+
+### 🔑 核心排序原则
+
+#### 1. **强制顺序字段**
+
+这些字段必须严格按指定顺序排列，不可调换：
+
+- **name** - 项目名称，必须第一位
+- **version** - 版本号，必须第二位
+- **private** - 私有标识，第三位
+- **description** - 项目描述，第四位
+
+#### 2. **分组内部排序**
+
+每个分组内的字段按功能重要性排序：
+
+```json
+{
+  // 依赖管理区域 - 按重要性排序
+  "dependencies": {}, // 生产依赖（最重要）
+  "devDependencies": {}, // 开发依赖
+  "peerDependencies": {}, // 对等依赖
+  "optionalDependencies": {}, // 可选依赖（最不重要）
+
+  // 工具配置区域 - 按字母序排列
+  "eslintConfig": {}, // E 开头
+  "husky": {}, // H 开头
+  "lint-staged": {}, // L 开头
+  "prettier": {} // P 开头
+}
+```
+
+#### 3. **现代化字段优先**
+
+在同类功能中，现代化字段排在传统字段前面：
+
+```json
+{
+  "exports": {}, // 现代化导出（优先）
+  "main": "", // 传统入口
+  "module": "", // ESM 入口
+  "types": "" // TypeScript 类型
+}
+```
+
+## 最佳实践示例
+
+### ✅ 正确排序
+
+```json
+{
+  "name": "@company/project-name",
+  "version": "1.2.3",
+  "private": true,
+  "description": "企业级 React 应用模板",
+  "keywords": ["react", "typescript", "enterprise"],
+  "homepage": "https://github.com/company/project#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/company/project.git"
+  },
+  "license": "MIT",
+  "author": "Company Name <team@company.com>",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "vite",
+    "test": "jest"
+  },
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "eslintConfig": {
+    "extends": ["react-app"]
+  }
+}
+```
+
+### 📚 不同项目类型的最佳实践
+
+#### 库项目 (Library)
+
+```json
+{
+  "name": "@company/ui-components",
+  "version": "2.1.0",
+  "description": "企业级 React UI 组件库",
+  "keywords": ["react", "components", "ui", "typescript"],
+  "homepage": "https://ui.company.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/company/ui-components.git"
+  },
+  "license": "MIT",
+  "author": "UI Team <ui-team@company.com>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles": "./dist/styles.css"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "scripts": {
+    "build": "rollup -c",
+    "build:types": "tsc --emitDeclarationOnly",
+    "dev": "storybook dev -p 6006",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "react": "^18.2.0",
+    "typescript": "^5.0.0",
+    "rollup": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
+```
+
+#### CLI 工具项目
+
+```json
+{
+  "name": "my-dev-cli",
+  "version": "1.5.2",
+  "description": "强大的前端开发脚手架工具",
+  "keywords": ["cli", "scaffold", "generator", "frontend"],
+  "homepage": "https://github.com/user/my-dev-cli#readme",
+  "bugs": {
+    "url": "https://github.com/user/my-dev-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/my-dev-cli.git"
+  },
+  "license": "MIT",
+  "author": "John Doe <john@example.com>",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "my-cli": "./bin/cli.js",
+    "my-dev": "./bin/cli.js"
+  },
+  "files": ["dist", "bin", "templates"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "commander": "^9.0.0",
+    "inquirer": "^8.0.0",
+    "chalk": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/inquirer": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
+```
+
+#### Monorepo 项目
+
+```json
+{
+  "name": "my-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "企业级微前端解决方案",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/company/monorepo.git"
+  },
+  "license": "MIT",
+  "author": "Architecture Team <arch@company.com>",
+  "workspaces": ["packages/*", "apps/*", "tools/*"],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.0",
+    "typescript": "^5.0.0",
+    "prettier": "^2.8.0",
+    "eslint": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=7.0.0"
+  },
+  "packageManager": "pnpm@8.6.0"
+}
+```
+
+#### Next.js 应用项目
+
+```json
+{
+  "name": "my-nextjs-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "现代化的 Next.js 全栈应用",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "13.4.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.0.0",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "typescript": "5.0.0",
+    "eslint": "8.40.0",
+    "eslint-config-next": "13.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+```
+
+### ❌ 错误排序
+
+```json
+{
+  "devDependencies": {},
+  "scripts": {},
+  "name": "my-project",
+  "dependencies": {},
+  "version": "1.0.0",
+  "eslintConfig": {},
+  "main": "index.js"
+}
+```
+
+## 常见问题
+
+### ❓ 为什么 scripts 不放在更前面？
+
+**答**：scripts 属于动态行为配置，而静态元数据（name、main、types）更重要。npm registry 和包消费者优先关心包的身份信息和使用方式，遵循"静态信息优先"原则。
+
+### ❓ peerDependencies 为什么排在 devDependencies 后面？
+
+**答**：虽然 peerDependencies 对库项目很重要，但从整体生态统计来看，devDependencies 在更多项目中被使用。这个排序基于大规模项目分析的使用频率数据。
+
+### ❓ 自定义字段应该放在哪里？
+
+**答**：按功能分组放置。模块相关的放在模块定义区域，构建相关的放在脚本附近，工具配置放在文档末尾。
+
+### ❓ monorepo 中每个包都要遵循相同顺序吗？
+
+**答**：是的，保持一致性很重要。所有 package.json 应该保持统一的字段排序标准。
+
+### ❓ 为什么要把 type 字段放在 main 前面？
+
+**答**：`type` 字段影响整个包的模块系统解析，比入口文件更基础。Node.js 会先读取 `type` 字段确定模块系统，再根据 `main` 字段加载入口文件。
+
+### ❓ exports 字段应该放在 main 前面还是后面？
+
+**答**：exports 应该放在 main 前面。exports 是现代化的包导出方式，优先级高于传统的 main 字段，按"现代化优先"原则排序。
+
+## 例外情况
+
+某些特殊项目类型可能有不同的排序需求：
+
+### 📚 库项目特殊考虑
+
+- **exports 字段优先级提升**：现代库更注重精确的导出控制
+- **types 字段重要性**：TypeScript 支持是库的核心特性
+- **peerDependencies 提前**：对库来说比 devDependencies 更重要
+
+### 🛠️ CLI 工具特殊考虑
+
+- **bin 字段优先级提升**：CLI 工具的核心功能
+- **engines 严格要求**：CLI 通常对 Node.js 版本有严格要求
+
+### 🏢 Monorepo 项目特殊考虑
+
+- **workspaces 字段优先级提升**：定义了整个仓库结构
+- **private: true 必须**：防止根包被意外发布

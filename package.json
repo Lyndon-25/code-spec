@@ -1,9 +1,29 @@
 {
   "name": "@lyndon/code-spec",
-  "version": "0.2.0",
-  "description": "一个现代化的 TypeScript 代码规范模板，集成了完整的开发工具链和最佳实践配置。旨在为团队提供开箱即用、规范化的项目开发环境。",
-  "main": "dist/index.js",
+  "version": "0.3.0",
+  "private": true,
+  "description": "企业级前端编码规范库，提供文件组织、页面架构、代码命名、TypeScript 类型系统、配置管理等完整规范体系，配套实践示例和自动化工具链，助力 React/TypeScript 项目标准化开发。",
+  "keywords": [
+    "code-quality",
+    "coding-standards",
+    "enterprise",
+    "best-practices"
+  ],
+  "homepage": "https://github.com/lyndon/code-spec#readme",
+  "bugs": {
+    "url": "https://github.com/lyndon/code-spec/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lyndon/code-spec.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Lyndon",
+    "email": "wuxianzhi052@gmail.com"
+  },
   "type": "module",
+  "main": "dist/index.js",
   "files": [
     "dist",
     "README.md",
@@ -11,6 +31,39 @@
   ],
   "scripts": {
     "prepare": "husky install"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "lodash-es": "^4.17.21",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "unstated-next": "^1.1.0",
+    "zod": "^4.0.14"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.30.1",
+    "@ls-lint/ls-lint": "^2.3.1",
+    "@types/lodash-es": "^4.17.12",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "@typescript-eslint/parser": "^8.35.1",
+    "eslint": "^9.30.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20.x",
+    "pnpm": ">=10.x"
   },
   "lint-staged": {
     "*": [
@@ -23,41 +76,5 @@
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
-  },
-  "keywords": [
-    "template",
-    "code-quality"
-  ],
-  "author": {
-    "name": "Lyndon",
-    "email": "wuxianzhi052@gmail.com"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lyndon/code-spec.git"
-  },
-  "bugs": {
-    "url": "https://github.com/lyndon/code-spec/issues"
-  },
-  "homepage": "https://github.com/lyndon/code-spec#readme",
-  "engines": {
-    "node": ">=20.x",
-    "pnpm": ">=10.x"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@eslint/js": "^9.30.1",
-    "@ls-lint/ls-lint": "^2.3.1",
-    "@typescript-eslint/eslint-plugin": "^8.35.1",
-    "@typescript-eslint/parser": "^8.35.1",
-    "eslint": "^9.30.1",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-prettier": "^5.5.1",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
   }
 }
